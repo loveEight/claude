@@ -3,7 +3,7 @@
     <div
       id="myList"
       ref="contentListRef"
-      :style="{ paddingBottom: list.length !== 0 ? '95px' : 0 }"
+      :style="{ paddingBottom: list.length !== 0 ? '103px' : 0 }"
     >
       <div
         v-show="item.text"
@@ -119,7 +119,7 @@
           v-model="question"
           clearable
           type="textarea"
-          :autosize="{ minRows: 1, maxRows: 2 }"
+          :autosize="{ minRows:1, maxRows: 2 }"
           id="message"
           placeholder="输入你的问题"
         >
@@ -142,7 +142,12 @@ import axios from "axios";
 import MarkdownIt from "markdown-it";
 import hljs from "highlight.js";
 import { ElMessage } from "element-plus";
+import resetSizeFun from '@/util/fontSize'
 import useClipboard from "vue-clipboard3";
+
+//重置微信页字体大小
+resetSizeFun()
+
 const list = ref([]); //展示列表
 const question = ref(""); //问题
 const parentMessageId = ref(""); //上下文id
@@ -309,7 +314,7 @@ function setScreen() {
   nextTick(() => {
     const height = contentListRef.value.clientHeight;
     setTimeout(() => {
-      const isOut = height >= screen.height - 105;
+      const isOut = height >= screen.height - 102 - 20;
       isOut
         ? window.scrollTo(0, document.body.scrollHeight)
         : window.scrollTo(0, 0);
@@ -364,6 +369,7 @@ function handleHomeQuestion(qid) {
   position: relative;
   height: 100vh;
   /* background-color: c; */
+  background-color: #f1f1f4;
   padding-bottom: 68px;
   overflow-y: auto;
 }
@@ -409,10 +415,11 @@ function handleHomeQuestion(qid) {
   overflow-x: hidden;
   overflow-y: auto;
   padding-bottom: 103px;
+  background-color: #f1f1f4;
 
   .clear-btn {
     position: absolute;
-    bottom: 58px;
+    bottom: 68px;
     left: 50%;
     transform: translate(-50%, 0);
     z-index: 100;
@@ -433,9 +440,7 @@ function handleHomeQuestion(qid) {
   .listImg {
     position: absolute;
     right: 18px;
-    top: -6px;
-    width: 45px;
-    height: 45px;
+    top: 1px;
   }
   .listText {
     position: relative;
@@ -446,16 +451,6 @@ function handleHomeQuestion(qid) {
     padding: 9px 12px 9px 9px;
     border-radius: 5px;
     background-color: rgb(149, 212, 117);
-    &::after {
-      display: block;
-      content: "◆";
-      position: absolute;
-      font-size: 30px;
-      right: -8px;
-      top: -1px;
-      color: rgb(149, 212, 117);
-    }
-
   }
 }
 
@@ -511,7 +506,8 @@ function handleHomeQuestion(qid) {
   margin-top: 11px;
   width: 40px;
   height: 40px;
-  border-radius: 50%;
+  border-radius: 3px;
+  // border-radius: 50%;
 }
 
 .listText {
@@ -526,35 +522,28 @@ function handleHomeQuestion(qid) {
   display: flex;
   justify-content: center;
   flex-direction: column;
-  margin-left: 10px;
+  font-size: 15px;
+  margin-left: 11px;
   padding: 8px 0 8px 10px;
   line-height: 25px;
   background-color: white;
   border-radius: 5px;
   white-space: pre-line;
-  background-color: #f5f7fa;
-  &::before {
-      display: block;
-      content: "◆";
-      position: absolute;
-      font-size: 26px;
-      left: 2px;
-      top: 7px;
-      color: #f5f7fa;
-    }
-
+  background-color: #fff;
 }
 
 //清除结果
 
 .bigBox {
+  display: flex;
+  align-items: center;
   position: fixed;
   padding-top: 8px;
-  padding-bottom: 8px;
+  padding-bottom: 20px;
   bottom: 0;
   left: 0;
   right: 0;
-  background-color: #fff;
+  background-color: #f1f1f4;;
   z-index: 100;
   .inputbox1 {
     /* margin: auto; */
@@ -658,8 +647,12 @@ function handleHomeQuestion(qid) {
 }
 
 .content-box {
-  padding-top: 208px;
-  margin: 0 auto;
+ /* padding-top: 208px;
+  margin: 0 auto;*/
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
   width: 800px;
 }
 .exhibition {
@@ -730,7 +723,8 @@ textarea {
   }
 
   .bigBox {
-    background-color: rgb(246, 248, 251);
+    border-top: 1px solid rgb(0, 0, 0, 0.1);
+    background-color: rgb(247, 248, 250);
   }
   .exhibition {
     .witem {
