@@ -408,6 +408,7 @@ function handleHomeQuestion(qid) {
   margin: 0 auto;
   overflow-x: hidden;
   overflow-y: auto;
+  padding-bottom: 12px;
   background-color: #f1f1f4;
 }
 
