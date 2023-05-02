@@ -1,10 +1,6 @@
 <template>
   <div class="page" :class="{ 'page-change': list.length }">
-    <div
-      id="myList"
-      ref="contentListRef"
-      :style="{ paddingBottom: list.length !== 0 ? '103px' : 0 }"
-    >
+    <div v-show="list.length" id="myList" ref="contentListRef">
       <div
         v-show="item.text"
         :class="item.currentType === 'user' ? 'problemList' : 'answerList'"
@@ -20,7 +16,7 @@
             trigger="click"
           >
             <template #reference>
-                <el-icon class="moreFilled"><MoreFilled /></el-icon>
+              <el-icon class="moreFilled"><MoreFilled /></el-icon>
             </template>
             <div class="fillConent">
               <div class="btn" id="copy-btn" @click="handleCopyText(index)">
@@ -38,14 +34,6 @@
         <img class="listImg" src="/logo.jpg" alt="" />
         <img class="addin" src="/loading.gif" alt="" />
       </div>
-
-      <el-button
-        type="danger"
-        @click="handleCancel"
-        class="clear-btn"
-        v-show="iscancel"
-        >停止答复</el-button
-      >
     </div>
     <div v-show="!list.length" class="content-box cancel-style">
       <div class="begintitle">
@@ -119,18 +107,17 @@
           v-model="question"
           clearable
           type="textarea"
-          :autosize="{ minRows:1, maxRows: 2 }"
+          :autosize="{ minRows: 1, maxRows: 2 }"
           id="message"
           placeholder="输入你的问题"
         >
         </el-input>
-        <el-button
-          type="success"
-          size="small"
-          :loading="iscancel"
-          icon="Promotion"
-          @click="send"
-        ></el-button>
+        <el-button type="success" size="small" v-if="!iscancel" @click="send"
+          >发送</el-button
+        >
+        <el-button v-else type="danger" size="small" @click="handleCancel"
+          >终止</el-button
+        >
       </div>
     </div>
   </div>
@@ -142,11 +129,11 @@ import axios from "axios";
 import MarkdownIt from "markdown-it";
 import hljs from "highlight.js";
 import { ElMessage } from "element-plus";
-import resetSizeFun from '@/util/fontSize'
+import resetSizeFun from "@/util/fontSize";
 import useClipboard from "vue-clipboard3";
 
 //重置微信页字体大小
-resetSizeFun()
+resetSizeFun();
 
 const list = ref([]); //展示列表
 const question = ref(""); //问题
@@ -250,7 +237,7 @@ async function send() {
     const obj = { message };
     if (parentMessageId.value) obj.parentMessageId = parentMessageId.value;
     axios({
-      url: " https://ui4wpz.laf.dev/send", //  https://jyf6wk.laf.dev/test-send
+      url: "https://ui4wpz.laf.dev/send", //  https://jyf6wk.laf.dev/test-send
       method: "post",
       data: obj,
       signal: controller.value.signal,
@@ -310,14 +297,20 @@ function handleCancel() {
 
 //判断是否滚动到顶部或底部
 function setScreen() {
-  console.log(screen.height);
+  // console.log(screen.height);
+
   nextTick(() => {
-    const height = contentListRef.value.clientHeight;
+    // const height = contentListRef.value.clientHeight;
     setTimeout(() => {
-      const isOut = height >= screen.height - 102 - 20;
-      isOut
-        ? window.scrollTo(0, document.body.scrollHeight)
-        : window.scrollTo(0, 0);
+      // const isOut = height >= screen.height - 102 - 20;
+      // isOut
+      //   ? window.scrollTo(0, document.body.scrollHeight)
+      //   : window.scrollTo(0, 0);
+      // const scrollTop = contentListRef.value.scrollTop
+      const scrollHeight = contentListRef.value.scrollHeight;
+      const clientHeight = contentListRef.value.clientHeight;
+      contentListRef.value.scrollTop = scrollHeight;
+      console.log(contentListRef.value.scrollTop, scrollHeight);
     }, 0);
   });
 }
@@ -376,7 +369,7 @@ function handleHomeQuestion(qid) {
 
 .page-change {
   padding-bottom: 0 !important;
-  overflow-y: visible !important;
+  // overflow-y: visible !important;
 }
 
 .defbut {
@@ -411,19 +404,11 @@ function handleHomeQuestion(qid) {
 #myList {
   position: relative;
   max-width: 1000px;
+  height: calc(100vh - 65px);
   margin: 0 auto;
   overflow-x: hidden;
   overflow-y: auto;
-  padding-bottom: 103px;
   background-color: #f1f1f4;
-
-  .clear-btn {
-    position: absolute;
-    bottom: 68px;
-    left: 50%;
-    transform: translate(-50%, 0);
-    z-index: 100;
-  }
 }
 
 .problemList {
@@ -461,6 +446,14 @@ function handleHomeQuestion(qid) {
   display: flex;
   overflow-x: auto;
   white-space: pre-wrap;
+
+  .clear-btn {
+    position: absolute;
+    bottom: 2px;
+    left: 50%;
+    transform: translate(-50%, 0);
+    z-index: 100;
+  }
 }
 
 :global(.el-popover.el-popper) {
@@ -468,14 +461,6 @@ function handleHomeQuestion(qid) {
 }
 :global(.el-popover) {
   --el-popover-padding: 0 !important;
-}
-.moreFilled {
-  display: inline-block;
-  position: absolute;
-  right: -13px;
-  bottom: 10px;
-  cursor: pointer;
-  transform: rotate(90deg);
 }
 
 .fillConent {
@@ -517,6 +502,14 @@ function handleHomeQuestion(qid) {
 
 .botTextPack {
   position: relative;
+  .moreFilled {
+    display: inline-block;
+    position: absolute;
+    right: -13px;
+    bottom: 10px;
+    cursor: pointer;
+    transform: rotate(90deg);
+  }
 }
 .botListText {
   display: flex;
@@ -543,7 +536,7 @@ function handleHomeQuestion(qid) {
   bottom: 0;
   left: 0;
   right: 0;
-  background-color: #f1f1f4;;
+  background-color: #f1f1f4;
   z-index: 100;
   .inputbox1 {
     /* margin: auto; */
@@ -580,6 +573,7 @@ function handleHomeQuestion(qid) {
     }
     :deep(.el-button--small) {
       padding: 16px 16px;
+      font-size: 14px;
     }
   }
 }
@@ -647,7 +641,7 @@ function handleHomeQuestion(qid) {
 }
 
 .content-box {
- /* padding-top: 208px;
+  /* padding-top: 208px;
   margin: 0 auto;*/
   position: absolute;
   left: 50%;
