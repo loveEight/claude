@@ -1,6 +1,11 @@
 <template>
   <div class="page" :class="{ 'page-change': list.length }">
-    <div v-show="list.length" id="myList" ref="contentListRef">
+    <div
+      v-show="list.length"
+      id="myList"
+      ref="contentListRef"
+      :style="{ overflowY: isForbidScroll ? 'hidden' : 'auto' }"
+    >
       <div
         v-show="item.text"
         :class="item.currentType === 'user' ? 'problemList' : 'answerList'"
@@ -103,7 +108,6 @@
         <el-input
           v-bind:readonly="loading"
           @keypress="handleEnter"
-          @focus="setScreen"
           v-model="question"
           clearable
           type="textarea"
@@ -135,6 +139,8 @@ import useClipboard from "vue-clipboard3";
 //重置微信页字体大小
 resetSizeFun();
 
+const isForbidScroll = ref(false);
+const keyboardHeight = ref(0); //手机键盘高度
 const list = ref([]); //展示列表
 const question = ref(""); //问题
 const parentMessageId = ref(""); //上下文id
@@ -159,12 +165,14 @@ const pList = [
   { qid: 9, question: "对2021年后的世界和事件的了解有限 →" },
 ];
 
+let initHeight = window.innerHeight;
 //监听变化修改样式
 onMounted(() => {
-  //处理头像问题
+  //判断是否是手机
   isMobileFun();
   window.addEventListener("resize", () => {
     isMobileFun();
+    handleH5Input();
   });
 });
 
@@ -203,7 +211,7 @@ async function send() {
     avatar: "/avatar.jpeg",
   });
 
-  setScreen();
+  // setScreen();
   question.value = "";
   loading.value = true;
   iscancel.value = true;
@@ -259,9 +267,11 @@ async function send() {
       .then(() => {
         controller.value = new AbortController();
         iscancel.value = false;
+        isForbidScroll.value = false;
       })
       .catch(function (thrown) {
         iscancel.value = false;
+        isForbidScroll.value = false;
         if (axios.isCancel(thrown)) {
           console.log("Request canceled", thrown.message);
         }
@@ -296,7 +306,7 @@ function handleCancel() {
 }
 
 //判断是否滚动到顶部或底部
-function setScreen() {
+function setScreen(keyboardHeight = 0) {
   // console.log(screen.height);
 
   nextTick(() => {
@@ -309,7 +319,7 @@ function setScreen() {
       // const scrollTop = contentListRef.value.scrollTop
       const scrollHeight = contentListRef.value.scrollHeight;
       const clientHeight = contentListRef.value.clientHeight;
-      contentListRef.value.scrollTop = scrollHeight;
+      contentListRef.value.scrollTop = scrollHeight + keyboardHeight;
       console.log(contentListRef.value.scrollTop, scrollHeight);
     }, 0);
   });
@@ -354,6 +364,15 @@ function handleHomeQuestion(qid) {
   const currQuestion = questionObj.question.replace("→", "").trim();
   question.value = currQuestion;
   send();
+}
+
+//移动端点击输入框内容在上处理
+function handleH5Input() {
+  //处理输入框点击后内容在上
+  const currentHeight = window.innerHeight;
+  keyboardHeight.value = initHeight - currentHeight;
+  setScreen(keyboardHeight.value);
+  isForbidScroll.value = keyboardHeight.value === 0 ? false : true;
 }
 </script>
 
