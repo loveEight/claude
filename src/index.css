@@ -1,4 +1,11 @@
 /* ./src/index.css */
+html {
+  height: 100%;
+}
+body {
+  height: 100vh;
+  overflow: hidden;
+}
 
 @tailwind base;
 @tailwind components;

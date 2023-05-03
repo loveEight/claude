@@ -100,7 +100,10 @@
     <!-- <div class="steppingstone">
       
     </div> -->
-    <div class="bigBox">
+    <div
+      class="bigBox"
+      :style="{ paddingBottom: isWeiXinH5 && keyboardHeight ? '0' : '20px' }"
+    >
       <div
         class="inputbox1"
         :style="{ maxWidth: isMobile ? '1000px' : '743px' }"
@@ -113,7 +116,7 @@
           type="textarea"
           :autosize="{ minRows: 1, maxRows: 2 }"
           id="message"
-          placeholder="输入你的问题"
+          :placeholder="'输入你的问题' + isWeiXinH5"
         >
         </el-input>
         <el-button type="success" size="small" v-if="!iscancel" @click="send"
@@ -139,7 +142,8 @@ import useClipboard from "vue-clipboard3";
 //重置微信页字体大小
 resetSizeFun();
 
-const isForbidScroll = ref(false);
+const isWeiXinH5 = ref(false);
+const isForbidScroll = ref(false); //是否禁止滚动
 const keyboardHeight = ref(0); //手机键盘高度
 const list = ref([]); //展示列表
 const question = ref(""); //问题
@@ -170,18 +174,25 @@ let initHeight = window.innerHeight;
 onMounted(() => {
   //判断是否是手机
   isMobileFun();
+  isWeixin();
   window.addEventListener("resize", () => {
     isMobileFun();
     handleH5Input();
   });
 });
 
+//判断是否是手机
 function isMobileFun() {
   if (screen.width < 768) {
     isMobile.value = true;
   } else {
     isMobile.value = false;
   }
+}
+//判断是否微信h5
+function isWeixin() {
+  const ua = window.navigator.userAgent.toLowerCase();
+  isWeiXinH5.value = ua.indexOf("micromessenger") !== -1;
 }
 
 //发送消息
@@ -320,6 +331,7 @@ function setScreen(keyboardHeight = 0) {
       const scrollHeight = contentListRef.value.scrollHeight;
       const clientHeight = contentListRef.value.clientHeight;
       contentListRef.value.scrollTop = scrollHeight + keyboardHeight;
+      if (keyboardHeight) window.scrollTo(0, 0);
       console.log(contentListRef.value.scrollTop, scrollHeight);
     }, 0);
   });
@@ -738,7 +750,17 @@ textarea {
 
   .bigBox {
     border-top: 1px solid rgb(0, 0, 0, 0.1);
-    background-color: rgb(247, 248, 250);
+    background-color: #fff;
+
+    .inputbox1 {
+      :deep(.el-textarea__inner:focus) {
+        border: none;
+      }
+      :deep(.el-textarea__inner) {
+        box-shadow: none;
+        background-color: #f1f2f3;
+      }
+    }
   }
   .exhibition {
     .witem {
