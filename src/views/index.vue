@@ -129,6 +129,16 @@
           placeholder="输入你的问题"
         >
         </el-input>
+        <div class="context-icon">
+          <context-icon
+            :is-mobile="isMobile"
+            :is-show="!iscancel"
+            :is-used="isUseContext"
+            @click="handleContext"
+            ref="contextIconRef"
+          >
+          </context-icon>
+        </div>
         <el-button type="success" size="small" v-if="!iscancel" @click="send"
           >发送</el-button
         >
@@ -144,6 +154,7 @@
 import { ref, onMounted, nextTick } from "vue";
 //组件
 import DeleteIcon from "@/components/DeleteIconVant.vue";
+import ContextIcon from "@/components/ContextIconVant.vue";
 //插件
 import axios from "axios";
 import MarkdownIt from "markdown-it";
@@ -152,11 +163,12 @@ import useClipboard from "vue-clipboard3";
 import { ElMessage } from "element-plus";
 //函数
 import resetSizeFun from "@/util/fontSize";
-import { Toast } from "vant";
 //重置微信页字体大小
 resetSizeFun();
 
-const deleteIconRef = ref();
+const isUseContext = ref(true);
+const contextIconRef = ref(); //是否启用上下文的对象
+const deleteIconRef = ref(); //删除按钮对象
 const isForbidScroll = ref(false); //是否禁止滚动
 const keyboardHeight = ref(0); //手机键盘高度
 const list = ref([]); //展示列表
@@ -254,7 +266,8 @@ async function send() {
     });
 
     const obj = { message };
-    if (parentMessageId.value) obj.parentMessageId = parentMessageId.value;
+    obj.parentMessageId = contextControlParams();
+    console.log("obj.parentMessageId", obj.parentMessageId);
     axios({
       url: "https://ui4wpz.laf.dev/send", //  https://jyf6wk.laf.dev/test-send
       method: "post",
@@ -266,7 +279,8 @@ async function send() {
         const xhr = progressEvent.event.target;
         let { responseText } = xhr;
         if (responseText.indexOf("error") != -1) {
-          responseText = responseText + "请求过于频繁，稍后再试";
+          responseText =
+            "----------请求过于频繁，稍后再试----------\n" + responseText;
         }
         const parts = responseText.split("--!");
         parentMessageId.value = parts[1];
@@ -385,10 +399,23 @@ function handleDeleteList() {
 }
 function handleConfirmD() {
   if (!list.value.length) {
-    deleteIconRef.value.failToast()
+    deleteIconRef.value.failToast();
   } else {
     list.value = [];
-    deleteIconRef.value.successToast()
+    deleteIconRef.value.successToast();
+  }
+}
+
+//是否启用上下文
+function handleContext() {
+  contextIconRef.value.useContext();
+  isUseContext.value = !isUseContext.value;
+}
+function contextControlParams() {
+  if (parentMessageId.value && isUseContext.value) {
+    return parentMessageId.value;
+  } else {
+    return "";
   }
 }
 </script>
@@ -603,7 +630,7 @@ function handleConfirmD() {
       border: 1px solid #000;
     }
     .el-button {
-      margin-left: 14px;
+      margin-left: 10px;
     }
     :deep(.el-button--small) {
       padding: 16px 16px;
@@ -617,6 +644,14 @@ function handleConfirmD() {
       align-items: center;
       justify-content: center;
       margin-right: 10px;
+      cursor: pointer;
+    }
+    .context-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-left: 10px;
+      margin-top: 5px;
       cursor: pointer;
     }
   }
