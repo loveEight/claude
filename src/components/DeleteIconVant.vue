@@ -1,6 +1,6 @@
 <template>
   <div class="deleteIconVant">
-    <van-icon :size="22" name="delete-o" />
+    <van-icon :size="23" name="delete-o" />
   </div>
 </template>
 
@@ -18,7 +18,6 @@ const props = defineProps({
 //处理删除逻辑
 function handleDelete(list) {
   if (!props.isShow) return;
-  console.log("处理删除逻辑", props.isMobile);
   if (props.isMobile) {
     showConfirmDialog({
       title: "是否清空聊天记录",
@@ -87,4 +86,5 @@ defineExpose({
   background-color: #f56c6c !important;
   border: 1px solid #f56c6c !important;
 }
+
 </style>
