@@ -1,0 +1,90 @@
+<template>
+  <div class="deleteIconVant">
+    <van-icon :size="22" name="delete-o" />
+  </div>
+</template>
+
+<script setup>
+import { ElMessage, ElMessageBox } from "element-plus";
+import { showDialog } from "vant";
+import { showConfirmDialog } from "vant";
+import { showSuccessToast, showFailToast } from "vant";
+const props = defineProps({
+  size: "22",
+  isMobile: false,
+  isShow: false,
+});
+
+//处理删除逻辑
+function handleDelete(list) {
+  if (!props.isShow) return;
+  console.log("处理删除逻辑", props.isMobile);
+  if (props.isMobile) {
+    showConfirmDialog({
+      title: "是否清空聊天记录",
+      confirmButtonColor: "#f11c27",
+    })
+      .then(() => {
+        emits("confirm");
+      })
+      .catch(() => {
+        // on cancel
+      });
+  } else {
+    ElMessageBox.confirm("是否删除全部聊天记录", "警告", {
+      confirmButtonText: "确认",
+      cancelButtonText: "取消",
+      type: "warning",
+      confirmButtonClass: "confirm-btn",
+    })
+      .then(() => {
+        emits("confirm");
+      })
+      .catch(() => {});
+  }
+}
+
+function successToast() {
+  if (props.isMobile) {
+    showSuccessToast({
+      message: "删除成功",
+      overlay: true,
+      forbidClick: true,
+      duration: 700,
+    });
+  } else {
+    ElMessage({
+      type: "success",
+      message: "删除成功",
+    });
+  }
+}
+
+function failToast() {
+  if (props.isMobile) {
+    showFailToast({
+      message: "不存在记录",
+      overlay: true,
+      forbidClick: true,
+      duration: 700,
+    });
+  } else {
+    ElMessage.error("不存在记录");
+  }
+}
+
+const emits = defineEmits(["confirm"]);
+
+defineExpose({
+  handleDelete,
+  successToast,
+  failToast,
+});
+</script>
+
+<style lang="scss" scoped>
+:global(.confirm-btn) {
+  background-color: #f56c6c !important;
+  border: 1px solid #f56c6c !important;
+}
+</style>

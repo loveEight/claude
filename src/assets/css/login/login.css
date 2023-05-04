@@ -3205,7 +3205,7 @@ html {
   position: relative;
 }
 .markdown ul li:before {
-  content: "•";
+  content: "、";
   font-size: 0.875rem;
   line-height: 1.25rem;
   margin-left: -1rem;
@@ -3257,6 +3257,7 @@ html {
 .markdown ul li > p,
 .markdown ul ol,
 .markdown ul ul {
+  padding: 0;
   margin: 0;
 }
 .markdown table {

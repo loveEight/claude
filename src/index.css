@@ -1,4 +1,5 @@
 /* ./src/index.css */
+@import url('@/assets/css/login/login.css');
 html {
   height: 100%;
 }
@@ -7,29 +8,68 @@ body {
   overflow: hidden;
 }
 
+blockquote,
+body,
+button,
+dd,
+dl,
+dt,
+fieldset,
+form,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+hr,
+input,
+legend,
+li,
+ol,
+p,
+pre,
+td,
+textarea,
+th,
+ul {
+  padding: 0;
+  margin: 0;
+ 
+}
+
+a {
+  color: #333;
+  text-decoration: none;
+}
+
+img {
+  vertical-align: top;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 table {
-    color: #333333;
-    border-width: 1px;
-    border-color: silver;
-    border-collapse: collapse;
-    min-width: 240px;
-    text-align: center;
-  }
-  table th {
-    border-width: 1px;
-    padding: 8px;
-    border-style: solid;
-    border-color: silver;
-    background-color: #dedede;
-  }
-  table td {
-    border-width: 1px;
-    padding: 8px;
-    border-style: solid;
-    border-color: silver;
-    background-color: #ffffff;
-  }
+  color: #333333;
+  border-width: 1px;
+  border-color: silver;
+  border-collapse: collapse;
+  min-width: 240px;
+  text-align: center;
+}
+table th {
+  border-width: 1px;
+  padding: 8px;
+  border-style: solid;
+  border-color: silver;
+  background-color: #dedede;
+}
+table td {
+  border-width: 1px;
+  padding: 8px;
+  border-style: solid;
+  border-color: silver;
+  background-color: #ffffff;
+}

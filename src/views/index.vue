@@ -13,7 +13,11 @@
       >
         <img class="listImg" :src="item.avatar" alt="" />
         <div v-if="item.currentType === 'bot'" class="botTextPack">
-          <div v-html="item.text" class="botListText" ref="botListRefs"></div>
+          <div
+            v-html="item.text"
+            class="botListText markdown"
+            ref="botListRefs"
+          ></div>
           <el-popover
             v-if="item.currentType === 'bot' && !iscancel"
             :placement="isMobile ? 'left' : 'right'"
@@ -100,14 +104,20 @@
     <!-- <div class="steppingstone">
       
     </div> -->
-    <div
-      class="bigBox"
-      :style="{ paddingBottom: isWeiXinH5 && keyboardHeight ? '0' : '20px' }"
-    >
+    <div class="bigBox">
       <div
         class="inputbox1"
         :style="{ maxWidth: isMobile ? '1000px' : '743px' }"
       >
+        <delete-icon
+          :is-mobile="isMobile"
+          :is-show="!iscancel"
+          class="delete"
+          @click="handleDeleteList"
+          @confirm="handleConfirmD"
+          ref="deleteIconRef"
+        >
+        </delete-icon>
         <el-input
           v-bind:readonly="loading"
           @keypress="handleEnter"
@@ -116,7 +126,7 @@
           type="textarea"
           :autosize="{ minRows: 1, maxRows: 2 }"
           id="message"
-          :placeholder="'输入你的问题' + isWeiXinH5"
+          placeholder="输入你的问题"
         >
         </el-input>
         <el-button type="success" size="small" v-if="!iscancel" @click="send"
@@ -132,17 +142,21 @@
 
 <script setup>
 import { ref, onMounted, nextTick } from "vue";
+//组件
+import DeleteIcon from "@/components/DeleteIconVant.vue";
+//插件
 import axios from "axios";
 import MarkdownIt from "markdown-it";
 import hljs from "highlight.js";
-import { ElMessage } from "element-plus";
-import resetSizeFun from "@/util/fontSize";
 import useClipboard from "vue-clipboard3";
-
+import { ElMessage } from "element-plus";
+//函数
+import resetSizeFun from "@/util/fontSize";
+import { Toast } from "vant";
 //重置微信页字体大小
 resetSizeFun();
 
-const isWeiXinH5 = ref(false);
+const deleteIconRef = ref();
 const isForbidScroll = ref(false); //是否禁止滚动
 const keyboardHeight = ref(0); //手机键盘高度
 const list = ref([]); //展示列表
@@ -174,14 +188,12 @@ let initHeight = window.innerHeight;
 onMounted(() => {
   //判断是否是手机
   isMobileFun();
-  isWeixin();
   window.addEventListener("resize", () => {
     isMobileFun();
     handleH5Input();
   });
 });
 
-//判断是否是手机
 function isMobileFun() {
   if (screen.width < 768) {
     isMobile.value = true;
@@ -189,25 +201,11 @@ function isMobileFun() {
     isMobile.value = false;
   }
 }
-//判断是否微信h5
-function isWeixin() {
-  const ua = window.navigator.userAgent.toLowerCase();
-  isWeiXinH5.value = ua.indexOf("micromessenger") !== -1;
-}
 
 //发送消息
 async function send() {
   //判断是否回复
   const message = question.value;
-  if (loading.value || iscancel.value) {
-    ElMessage({
-      showClose: true,
-      message: "请停止答复，后提出问题",
-      center: true,
-      type: "error",
-    });
-    return;
-  }
   if (message == "") {
     ElMessage({
       showClose: true,
@@ -222,7 +220,7 @@ async function send() {
     avatar: "/avatar.jpeg",
   });
 
-  // setScreen();
+  setScreen();
   question.value = "";
   loading.value = true;
   iscancel.value = true;
@@ -233,15 +231,17 @@ async function send() {
         if (lang && hljs.getLanguage(lang)) {
           try {
             return (
-              '<pre class="hljs"><code>' +
+              '<pre class="hljs mark-body"><code>' +
               hljs.highlight(lang, str, true).value +
               "</code></pre>"
             );
           } catch (__) {}
         }
         return (
-          '<pre class="hljs"><code>' +
-          md.utils.escapeHtml(str.replace(/[\r\n]+/g, "\n")) +
+          '<pre class="hljs mark-body" ><code>' +
+          md.utils.escapeHtml(
+            str.replace(/[\r\n]+/g, "\n").replace(/(\d)\./g, "$1、")
+          ) +
           "</code></pre>"
         );
       },
@@ -265,9 +265,9 @@ async function send() {
       onDownloadProgress: function (progressEvent) {
         const xhr = progressEvent.event.target;
         let { responseText } = xhr;
-        if (responseText.indexOf("error") != -1)
+        if (responseText.indexOf("error") != -1) {
           responseText = responseText + "请求过于频繁，稍后再试";
-        // console.log('responseText', responseText ,typeof responseText)
+        }
         const parts = responseText.split("--!");
         parentMessageId.value = parts[1];
         list.value[list.value.length - 1].text = md.render(parts[0]);
@@ -314,25 +314,17 @@ function handleCancel() {
   controller.value = new AbortController();
   iscancel.value = false;
   loading.value = false;
+  const text = list.value[list.value.length - 1].text;
+  if (text === "") list.value[list.value.length - 1].text = "回复取消";
 }
 
 //判断是否滚动到顶部或底部
 function setScreen(keyboardHeight = 0) {
-  // console.log(screen.height);
-
   nextTick(() => {
-    // const height = contentListRef.value.clientHeight;
     setTimeout(() => {
-      // const isOut = height >= screen.height - 102 - 20;
-      // isOut
-      //   ? window.scrollTo(0, document.body.scrollHeight)
-      //   : window.scrollTo(0, 0);
-      // const scrollTop = contentListRef.value.scrollTop
       const scrollHeight = contentListRef.value.scrollHeight;
       const clientHeight = contentListRef.value.clientHeight;
       contentListRef.value.scrollTop = scrollHeight + keyboardHeight;
-      if (keyboardHeight) window.scrollTo(0, 0);
-      console.log(contentListRef.value.scrollTop, scrollHeight);
     }, 0);
   });
 }
@@ -385,6 +377,19 @@ function handleH5Input() {
   keyboardHeight.value = initHeight - currentHeight;
   setScreen(keyboardHeight.value);
   isForbidScroll.value = keyboardHeight.value === 0 ? false : true;
+}
+
+//是否删除列表
+function handleDeleteList() {
+  deleteIconRef.value.handleDelete(list.value);
+}
+function handleConfirmD() {
+  if (!list.value.length) {
+    deleteIconRef.value.failToast()
+  } else {
+    list.value = [];
+    deleteIconRef.value.successToast()
+  }
 }
 </script>
 
@@ -597,15 +602,22 @@ function handleH5Input() {
       font-size: 16px;
       border: 1px solid #000;
     }
-    :deep(.el-icon) {
-      font-size: 22px;
-    }
     .el-button {
       margin-left: 14px;
     }
     :deep(.el-button--small) {
       padding: 16px 16px;
       font-size: 14px;
+    }
+    :deep(.el-icon) {
+      font-size: 22px;
+    }
+    .delete {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 10px;
+      cursor: pointer;
     }
   }
 }
@@ -677,7 +689,7 @@ function handleH5Input() {
   margin: 0 auto;*/
   position: absolute;
   left: 50%;
-  top: 50%;
+  top: 40%;
   transform: translate(-50%, -50%);
   width: 800px;
 }
@@ -750,17 +762,7 @@ textarea {
 
   .bigBox {
     border-top: 1px solid rgb(0, 0, 0, 0.1);
-    background-color: #fff;
-
-    .inputbox1 {
-      :deep(.el-textarea__inner:focus) {
-        border: none;
-      }
-      :deep(.el-textarea__inner) {
-        box-shadow: none;
-        background-color: #f1f2f3;
-      }
-    }
+    background-color: rgb(247, 248, 250);
   }
   .exhibition {
     .witem {
