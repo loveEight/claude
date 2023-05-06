@@ -1,6 +1,18 @@
 <template>
   <div class="deleteIconVant">
-    <van-icon :size="23" name="delete-o" />
+    <template v-if="!isMobile">
+      <el-tooltip
+        class="box-item"
+        effect="dark"
+        content="是否删除聊天记录"
+        placement="top-start"
+      >
+        <van-icon :size="size" name="delete" color="#606266" />
+      </el-tooltip>
+    </template>
+    <template v-else>
+      <van-icon :size="size" name="delete" color="#606266"/>
+    </template>
   </div>
 </template>
 
@@ -10,9 +22,9 @@ import { showDialog } from "vant";
 import { showConfirmDialog } from "vant";
 import { showSuccessToast, showFailToast } from "vant";
 const props = defineProps({
-  size: "22",
-  isMobile: false,
-  isShow: false,
+  size: { type: String, default: "22" },
+  isMobile: { type: Boolean, default: false },
+  isShow: { type: Boolean, default: false },
 });
 
 //处理删除逻辑
@@ -86,5 +98,4 @@ defineExpose({
   background-color: #f56c6c !important;
   border: 1px solid #f56c6c !important;
 }
-
 </style>

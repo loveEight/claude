@@ -18,22 +18,14 @@
             class="botListText markdown"
             ref="botListRefs"
           ></div>
-          <el-popover
-            v-if="item.currentType === 'bot' && !iscancel"
-            :placement="isMobile ? 'left' : 'right'"
-            :popper-style="{ width: '50px !important' }"
-            trigger="click"
+          <copy-icon-ele class="moreFilled"
+            :iscanel="iscancel"
+            :is-use-copy="isUseCopy"
+            :is-mobile="isMobile"
+            :index="index"
+            @copy="handleCopyEle"
           >
-            <template #reference>
-              <el-icon class="moreFilled"><MoreFilled /></el-icon>
-            </template>
-            <div class="fillConent">
-              <div class="btn" id="copy-btn" @click="handleCopyText(index)">
-                <el-icon><DocumentCopy /></el-icon>
-                复制
-              </div>
-            </div>
-          </el-popover>
+          </copy-icon-ele>
         </div>
 
         <div v-else class="listText">{{ item.text }}</div>
@@ -109,15 +101,6 @@
         class="inputbox1"
         :style="{ maxWidth: isMobile ? '1000px' : '743px' }"
       >
-        <delete-icon
-          :is-mobile="isMobile"
-          :is-show="!iscancel"
-          class="delete"
-          @click="handleDeleteList"
-          @confirm="handleConfirmD"
-          ref="deleteIconRef"
-        >
-        </delete-icon>
         <el-input
           v-bind:readonly="loading"
           @keypress="handleEnter"
@@ -129,22 +112,47 @@
           placeholder="输入你的问题"
         >
         </el-input>
-        <div class="context-icon">
-          <context-icon
-            :is-mobile="isMobile"
-            :is-show="!iscancel"
-            :is-used="isUseContext"
-            @click="handleContext"
-            ref="contextIconRef"
-          >
-          </context-icon>
-        </div>
+
         <el-button type="success" size="small" v-if="!iscancel" @click="send"
           >发送</el-button
         >
         <el-button v-else type="danger" size="small" @click="handleCancel"
           >终止</el-button
         >
+        <div class="control">
+          <div class="context-icon">
+            <context-icon
+              :is-mobile="isMobile"
+              :is-show="!iscancel"
+              :is-used="isUseContext"
+              size="23"
+              @click="handleContext"
+              ref="contextIconRef"
+            >
+            </context-icon>
+          </div>
+          <div class="copy-icon">
+            <copy-icon
+              v-if="isMobile"
+              :is-mobile="isMobile"
+              :is-used="isUseCopy"
+              :is-show="!iscancel"
+              size="23"
+              @click="handleCopyIcon"
+              ref="copyIconRef"
+            ></copy-icon>
+          </div>
+          <div class="delete-icon">
+            <delete-icon
+              :is-mobile="isMobile"
+              :is-show="!iscancel"
+              size="23"
+              @click="handleDeleteList"
+              @confirm="handleConfirmD"
+              ref="deleteIconRef"
+            ></delete-icon>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -155,18 +163,25 @@ import { ref, onMounted, nextTick } from "vue";
 //组件
 import DeleteIcon from "@/components/DeleteIconVant.vue";
 import ContextIcon from "@/components/ContextIconVant.vue";
+import CopyIcon from "@/components/CopyIconVant.vue";
+import CopyIconEle from "@/components/CopyIconEle.vue";
 //插件
 import axios from "axios";
 import MarkdownIt from "markdown-it";
 import hljs from "highlight.js";
 import useClipboard from "vue-clipboard3";
+
 import { ElMessage } from "element-plus";
 //函数
 import resetSizeFun from "@/util/fontSize";
+
+
 //重置微信页字体大小
 resetSizeFun();
 
-const isUseContext = ref(true);
+const isUseCopy = ref(false); //是否启用上下文
+const copyIconRef = ref(); //是否启用上下文的对象
+const isUseContext = ref(false); //是否启用上下文
 const contextIconRef = ref(); //是否启用上下文的对象
 const deleteIconRef = ref(); //删除按钮对象
 const isForbidScroll = ref(false); //是否禁止滚动
@@ -343,36 +358,6 @@ function setScreen(keyboardHeight = 0) {
   });
 }
 
-const { toClipboard } = useClipboard();
-//复制文本内容
-function handleCopyText(index) {
-  // const text = list.value[index].text
-  //   .replace(/(<([^>]+)>)/gi, "")
-  //   .replace(/(\r\n|\n|\r)/gm, "");
-
-  console.log("index", index);
-  const currentIndex = index - 1 === 0 ? 0 : (index - 1) / 2;
-  nextTick(() => {
-    // console.log(botListRefs.value)
-    // console.log(botListRefs.value[index - 1 ])
-    // console.log(botListRefs.value[index - 1].innerText)
-    const text = botListRefs.value[currentIndex].innerText;
-    toClipboard(text).then(
-      function (e) {
-        ElMessage({
-          showClose: true,
-          message: "复制到剪贴版成功",
-          center: true,
-          type: "success",
-        });
-      },
-      function (e) {
-        console.log("copy arguments e:", e);
-        alert("复制失败!");
-      }
-    );
-  });
-}
 
 //处理首页问题点击
 function handleHomeQuestion(qid) {
@@ -417,6 +402,35 @@ function contextControlParams() {
   } else {
     return "";
   }
+}
+
+//是否启用复制
+function handleCopyIcon() {
+  copyIconRef.value.useCopy()
+  isUseCopy.value = !isUseCopy.value;
+}
+
+const { toClipboard } = useClipboard();
+//复制逻辑
+function handleCopyEle(currentIndex) {
+  console.log('currentIndex', currentIndex)
+  nextTick(() => {
+    const text = botListRefs.value[currentIndex].innerText;
+    toClipboard(text).then(
+      function (e) {
+        ElMessage({
+          showClose: true,
+          message: "复制到剪贴版成功",
+          center: true,
+          type: "success",
+        });
+      },
+      function (e) {
+        console.log("copy arguments e:", e);
+        alert("复制失败!");
+      }
+    );
+  });
 }
 </script>
 
@@ -467,7 +481,7 @@ function contextControlParams() {
 #myList {
   position: relative;
   max-width: 1000px;
-  height: calc(100vh - 65px);
+  height: calc(100vh - 89px);
   margin: 0 auto;
   overflow-x: hidden;
   overflow-y: auto;
@@ -527,27 +541,7 @@ function contextControlParams() {
   --el-popover-padding: 0 !important;
 }
 
-.fillConent {
-  display: flex;
-  justify-content: space-around;
-  flex-direction: column;
-  cursor: pointer;
-  .btn {
-    .el-icon {
-      margin-right: 4px;
-    }
-    display: flex;
-    padding: 5px 5px;
-    justify-content: center;
-    align-items: center;
-    color: #fff;
-    background-color: #48484e;
-    border-radius: 3px;
-  }
-  .btn:hover {
-    background-color: #59595e;
-  }
-}
+
 
 .listImg {
   position: relative;
@@ -593,15 +587,18 @@ function contextControlParams() {
 
 .bigBox {
   display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   align-items: center;
   position: fixed;
-  padding-top: 8px;
-  padding-bottom: 20px;
+  padding-top: 40px;
+  padding-bottom: 15px;
   bottom: 0;
   left: 0;
   right: 0;
   background-color: #f1f1f4;
   z-index: 100;
+
   .inputbox1 {
     /* margin: auto; */
     width: 90%;
@@ -630,7 +627,7 @@ function contextControlParams() {
       border: 1px solid #000;
     }
     .el-button {
-      margin-left: 10px;
+      margin-left: 8px;
     }
     :deep(.el-button--small) {
       padding: 16px 16px;
@@ -639,20 +636,15 @@ function contextControlParams() {
     :deep(.el-icon) {
       font-size: 22px;
     }
-    .delete {
+    .control {
+      position: absolute;
       display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-right: 10px;
-      cursor: pointer;
-    }
-    .context-icon {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-left: 10px;
-      margin-top: 5px;
-      cursor: pointer;
+      height: 20px;
+      top: 7px;
+      .context-icon,.delete-icon, .copy-icon {
+        margin-right: 33px;
+        cursor: pointer;
+      }
     }
   }
 }

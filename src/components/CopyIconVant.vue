@@ -1,26 +1,10 @@
 <template>
   <div class="ContextIconVant">
-    <template v-if="!isMobile">
-      <el-tooltip
-        class="box-item"
-        effect="dark"
-        content="是否开启上下文"
-        placement="top-start"
-      >
-        <van-icon
-          :size="size"
-          name="chat"
-          :style="{ color: props.isUsed ? 'orange' : '#606266' }"
-        />
-      </el-tooltip>
-    </template>
-    <template v-else>
-        <van-icon
-          :size="size"
-          name="chat"
-          :style="{ color: props.isUsed ? 'orange' : '#606266' }"
-        />
-    </template>
+    <van-icon
+      :size="size"
+      name="column"
+      :style="{ color: props.isUsed ? 'orange' : '#606266' }"
+    />
   </div>
 </template>
 
@@ -35,7 +19,7 @@ const props = defineProps({
 });
 
 //处理删除逻辑
-function useContext(list) {
+function useCopy(list) {
   if (!props.isShow) return;
   if (props.isMobile) {
     mobileToast();
@@ -47,13 +31,13 @@ function useContext(list) {
 let message = "";
 //手机
 function mobileToast() {
-  message = !props.isUsed ? "开启上下文关联" : "关闭上下文关联";
+  message = !props.isUsed ? "开启内容复制" : "关闭内容复制";
   showToast(message);
 }
 
 //电脑
 function pcToast() {
-  message = !props.isUsed ? "开启上下文关联" : "关闭上下文关联";
+  message = !props.isUsed ? "开启内容复制" : "关闭内容复制";
   const type = !props.isUsed ? "success" : "info";
   ElMessage({
     message: message,
@@ -62,7 +46,7 @@ function pcToast() {
 }
 
 defineExpose({
-  useContext,
+  useCopy,
 });
 </script>
 
