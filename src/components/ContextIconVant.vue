@@ -10,7 +10,7 @@
         <van-icon
           :size="size"
           name="chat"
-          :style="{ color: props.isUsed ? 'orange' : '#606266' }"
+          :style="{ color: props.isUsed ? '#67c23a' : '#606266' }"
         />
       </el-tooltip>
     </template>
@@ -18,7 +18,7 @@
         <van-icon
           :size="size"
           name="chat"
-          :style="{ color: props.isUsed ? 'orange' : '#606266' }"
+          :style="{ color: props.isUsed ? '#67c23a' : '#606266' }"
         />
     </template>
   </div>

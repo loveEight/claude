@@ -18,7 +18,8 @@
             class="botListText markdown"
             ref="botListRefs"
           ></div>
-          <copy-icon-ele class="moreFilled"
+          <copy-icon-ele
+            class="moreFilled"
             :iscanel="iscancel"
             :is-use-copy="isUseCopy"
             :is-mobile="isMobile"
@@ -107,7 +108,7 @@
           v-model="question"
           clearable
           type="textarea"
-          :autosize="{ minRows: 1, maxRows: 2 }"
+          :autosize="{ minRows: 1, maxRows: 8 }"
           id="message"
           placeholder="输入你的问题"
         >
@@ -120,6 +121,17 @@
           >终止</el-button
         >
         <div class="control">
+          <div class="role-icon">
+            <role-icon
+              size="23"
+              :is-show="!iscancel"
+              :is-mobile="isMobile"
+              ref="roleIconRef"
+              @click="handleRole"
+              @showRole="handleUseRole"
+            >
+            </role-icon>
+          </div>
           <div class="context-icon">
             <context-icon
               :is-mobile="isMobile"
@@ -154,6 +166,15 @@
           </div>
         </div>
       </div>
+      <div class="roleList">
+        <role-list
+          :show="showRoleList"
+          :is-mobile="isMobile"
+          ref="roleListRef"
+          @sendText="handleSendText"
+        >
+        </role-list>
+      </div>
     </div>
   </div>
 </template>
@@ -165,6 +186,8 @@ import DeleteIcon from "@/components/DeleteIconVant.vue";
 import ContextIcon from "@/components/ContextIconVant.vue";
 import CopyIcon from "@/components/CopyIconVant.vue";
 import CopyIconEle from "@/components/CopyIconEle.vue";
+import RoleIcon from "@/components/RoleIconVant.vue";
+import RoleList from "@/components/RoleList.vue";
 //插件
 import axios from "axios";
 import MarkdownIt from "markdown-it";
@@ -175,13 +198,15 @@ import { ElMessage } from "element-plus";
 //函数
 import resetSizeFun from "@/util/fontSize";
 
-
 //重置微信页字体大小
 resetSizeFun();
 
+const roleListRef = ref(); //角色列表对象
+const showRoleList = ref(false); //是否展示角色列表
+const roleIconRef = ref(); // 是否使用角色的对象
 const isUseCopy = ref(false); //是否启用上下文
-const copyIconRef = ref(); //是否启用上下文的对象
-const isUseContext = ref(false); //是否启用上下文
+const copyIconRef = ref(); //是否启用复制的对象
+const isUseContext = ref(true); //是否启用上下文
 const contextIconRef = ref(); //是否启用上下文的对象
 const deleteIconRef = ref(); //删除按钮对象
 const isForbidScroll = ref(false); //是否禁止滚动
@@ -358,7 +383,6 @@ function setScreen(keyboardHeight = 0) {
   });
 }
 
-
 //处理首页问题点击
 function handleHomeQuestion(qid) {
   console.log(qid);
@@ -406,14 +430,14 @@ function contextControlParams() {
 
 //是否启用复制
 function handleCopyIcon() {
-  copyIconRef.value.useCopy()
+  copyIconRef.value.useCopy();
   isUseCopy.value = !isUseCopy.value;
 }
 
 const { toClipboard } = useClipboard();
 //复制逻辑
 function handleCopyEle(currentIndex) {
-  console.log('currentIndex', currentIndex)
+  console.log("currentIndex", currentIndex);
   nextTick(() => {
     const text = botListRefs.value[currentIndex].innerText;
     toClipboard(text).then(
@@ -431,6 +455,17 @@ function handleCopyEle(currentIndex) {
       }
     );
   });
+}
+
+//使用角色
+function handleRole() {
+  roleIconRef.value.useRole()
+}
+function handleUseRole() {
+  roleListRef.value.showList()
+}
+function handleSendText(text) {
+  question.value = text;
 }
 </script>
 
@@ -541,8 +576,6 @@ function handleCopyEle(currentIndex) {
   --el-popover-padding: 0 !important;
 }
 
-
-
 .listImg {
   position: relative;
   top: -10px;
@@ -617,6 +650,8 @@ function handleCopyEle(currentIndex) {
     :deep(.el-textarea__inner) {
       color: #000;
       font-size: 16px;
+      border: 1px solid #f1f2f3;
+      /* box-sizing: content-box; */
       ::-webkit-scrollbar {
         display: none;
       }
@@ -641,7 +676,7 @@ function handleCopyEle(currentIndex) {
       display: flex;
       height: 20px;
       top: 7px;
-      .context-icon,.delete-icon, .copy-icon {
+      .role-icon,.context-icon,.delete-icon{
         margin-right: 33px;
         cursor: pointer;
       }

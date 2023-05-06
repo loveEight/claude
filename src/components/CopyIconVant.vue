@@ -3,7 +3,7 @@
     <van-icon
       :size="size"
       name="column"
-      :style="{ color: props.isUsed ? 'orange' : '#606266' }"
+      :style="{ color: props.isUsed ? '#67c23a' : '#606266' }"
     />
   </div>
 </template>
@@ -51,5 +51,7 @@ defineExpose({
 </script>
 
 <style lang="scss" scoped>
-
+.ContextIconVant {
+  margin-right: 33px;
+}
 </style>
