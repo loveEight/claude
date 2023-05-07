@@ -2,9 +2,10 @@ import { createApp} from 'vue'
 import App from './App.vue'
 import router from './router'
 import 'normalize.css'
-import './index.css'
+import './index.less'
 import hljs from 'highlight.js';
 import 'highlight.js/styles/atom-one-dark.css' //样式
+import 'highlight.js/styles/vs2015.css'
 import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'

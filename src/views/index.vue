@@ -13,11 +13,7 @@
       >
         <img class="listImg" :src="item.avatar" alt="" />
         <div v-if="item.currentType === 'bot'" class="botTextPack">
-          <div
-            v-html="item.text"
-            class="botListText markdown"
-            ref="botListRefs"
-          ></div>
+          <div class="botListText" ref="botListRefs" v-html="item.text"></div>
           <copy-icon-ele
             class="moreFilled"
             :iscanel="iscancel"
@@ -188,13 +184,12 @@ import CopyIcon from "@/components/CopyIconVant.vue";
 import CopyIconEle from "@/components/CopyIconEle.vue";
 import RoleIcon from "@/components/RoleIconVant.vue";
 import RoleList from "@/components/RoleList.vue";
+import { ElMessage } from "element-plus";
 //插件
 import axios from "axios";
 import MarkdownIt from "markdown-it";
 import hljs from "highlight.js";
 import useClipboard from "vue-clipboard3";
-
-import { ElMessage } from "element-plus";
 //函数
 import resetSizeFun from "@/util/fontSize";
 
@@ -256,9 +251,9 @@ function isMobileFun() {
 
 //发送消息
 async function send() {
-  //判断是否回复
-  const message = question.value;
-  if (message == "") {
+  //判断是否是编程问题
+  const message = question.value
+  if (message.trim() == "") {
     ElMessage({
       showClose: true,
       message: "输入你的问题",
@@ -278,24 +273,71 @@ async function send() {
   iscancel.value = true;
 
   try {
+    // const md = new MarkdownIt({
+    //   highlight: function (str, lang) {
+    //     if (lang && hljs.getLanguage(lang)) {
+    //       try {
+    //         return (
+    //           '<pre class="hljs mark-body"><code>' +
+    //           hljs.highlight(lang, str, true).value +
+    //           "</code></pre>"
+    //         );
+    //       } catch (__) {}
+    //     }
+    //     return (
+    //       '<pre class="hljs mark-body" ><code>' +
+    //       md.utils.escapeHtml(
+    //         str.replace(/[\r\n]+/g, "\n").replace(/(\d)\./g, "$1、")
+    //       ) +
+    //       "</code></pre>"
+    //     );
+    //   },
+    // });
     const md = new MarkdownIt({
-      highlight: function (str, lang) {
+      linkify: true,
+      highlight(str, lang) {
         if (lang && hljs.getLanguage(lang)) {
           try {
-            return (
-              '<pre class="hljs mark-body"><code>' +
-              hljs.highlight(lang, str, true).value +
-              "</code></pre>"
-            );
+            // 得到经过highlight.js之后的html代码
+            const preCode = hljs.highlight(lang, str, true).value;
+            // 以换行进行分割
+            const lines = preCode.split(/\n/).slice(0, -1);
+            // 添加自定义行号
+            let html = lines
+              .map((item, index) => {
+                return (
+                  '<li><span class="line-num" data-line="' +
+                  (index + 1) +
+                  '"></span>' +
+                  item +
+                  "</li>"
+                );
+              })
+              .join("");
+            html = "<ol>" + html + "</ol>";
+            // 添加代码语言
+            if (lines.length) {
+              html += '<b class="name">' + lang + "</b>";
+            }
+            return '<pre class="hljs"><code>' + html + "</code></pre>";
           } catch (__) {}
         }
-        return (
-          '<pre class="hljs mark-body" ><code>' +
-          md.utils.escapeHtml(
-            str.replace(/[\r\n]+/g, "\n").replace(/(\d)\./g, "$1、")
-          ) +
-          "</code></pre>"
-        );
+        // 未添加代码语言，此处与上面同理
+        const preCode = md.utils.escapeHtml(str);
+        const lines = preCode.split(/\n/).slice(0, -1);
+        let html = lines
+          .map((item, index) => {
+            return (
+              '<li><span class="line-num" data-line="' +
+              (index + 1) +
+              '"></span>' +
+              item +
+              "</li>"
+            );
+          })
+          .join("");
+        html = "<ol>" + html + "</ol>";
+        return '<pre class="hljs"><code>' + html + "</code></pre>";
       },
     });
 
@@ -318,13 +360,16 @@ async function send() {
       onDownloadProgress: function (progressEvent) {
         const xhr = progressEvent.event.target;
         let { responseText } = xhr;
-        if (responseText.indexOf("error") != -1) {
-          responseText =
-            "----------请求过于频繁，稍后再试----------\n" + responseText;
+        let text = responseText;
+        if (text.indexOf("invoke cloud function got error") !== -1) {
+          text = "请求过于频繁,请稍后再试&nbsp;&nbsp;";
+          list.value[list.value.length - 1].text = text;
+        } else {
+          const parts = text.split("--!");
+          parentMessageId.value = parts[1];
+          list.value[list.value.length - 1].text = md.render(parts[0])
+          
         }
-        const parts = responseText.split("--!");
-        parentMessageId.value = parts[1];
-        list.value[list.value.length - 1].text = md.render(parts[0]);
         loading.value = false;
         setScreen();
       },
@@ -369,7 +414,8 @@ function handleCancel() {
   iscancel.value = false;
   loading.value = false;
   const text = list.value[list.value.length - 1].text;
-  if (text === "") list.value[list.value.length - 1].text = "回复取消";
+  if (text === "")
+    list.value[list.value.length - 1].text = "回复取消&nbsp;&nbsp;";
 }
 
 //判断是否滚动到顶部或底部
@@ -459,10 +505,10 @@ function handleCopyEle(currentIndex) {
 
 //使用角色
 function handleRole() {
-  roleIconRef.value.useRole()
+  roleIconRef.value.useRole();
 }
 function handleUseRole() {
-  roleListRef.value.showList()
+  roleListRef.value.showList();
 }
 function handleSendText(text) {
   question.value = text;
@@ -609,11 +655,12 @@ function handleSendText(text) {
   font-size: 15px;
   margin-left: 11px;
   padding: 8px 0 8px 10px;
-  line-height: 25px;
+  line-height: 22px;
   background-color: white;
   border-radius: 5px;
   white-space: pre-line;
   background-color: #fff;
+  overflow-x: auto;
 }
 
 //清除结果
@@ -676,7 +723,9 @@ function handleSendText(text) {
       display: flex;
       height: 20px;
       top: 7px;
-      .role-icon,.context-icon,.delete-icon{
+      .role-icon,
+      .context-icon,
+      .delete-icon {
         margin-right: 33px;
         cursor: pointer;
       }
@@ -853,5 +902,9 @@ textarea {
   }
 }
 
+:deep(.github-markdown-body) {
+  padding-bottom: 0 !important;
+}
 /* 禁用样式 */
+// 添加行号样式
 </style>
