@@ -9,4 +9,4 @@ npm run dev
 ## 示例
 ![Image](https://github.com/loveEight/chatBot-Master/blob/main/pc.jpg)
 
-![Image]https://github.com/loveEight/chatBot-Master/blob/main/phone.jpg)   
+![Image](https://github.com/loveEight/chatBot-Master/blob/main/phone.jpg)   
