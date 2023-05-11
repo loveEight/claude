@@ -80,7 +80,7 @@
 <script setup>
 import { ref, watch, reactive } from "vue";
 import roleList from "@/assets/chatmossNewCopy.json";
-import roleList2 from "@/assets/chatmossNew.json";
+// import roleList2 from "@/assets/chatmoss.json";
 
 const dialogFormVisible = ref(false);
 const formLabelWidth = "140px";
@@ -91,12 +91,9 @@ const props = defineProps({
 });
 const emits = defineEmits(["sendText"]);
 
-const columns = roleList2.map((item) => {
-  return {
-    text: item.key,
-    value: item.value,
-  };
-});
+// const columns = roleList2.map((item) => {
+//   return item.key
+// });
 
 const form = reactive({
   text: "",

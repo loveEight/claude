@@ -655,7 +655,7 @@ function handleSendText(text) {
   flex-direction: column;
   font-size: 15px;
   margin-left: 11px;
-  padding: 11px 0 9px 10px;
+  padding: 10px 0 9px 10px;
   line-height: 22px;
   background-color: white;
   border-radius: 5px;
