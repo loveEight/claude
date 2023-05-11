@@ -351,7 +351,7 @@ async function send() {
     obj.parentMessageId = contextControlParams();
     console.log("obj.parentMessageId", obj.parentMessageId);
     axios({
-      url: "https://ui4wpz.laf.dev/send", //  https://jyf6wk.laf.dev/test-send
+      url: "https://ui4wpz.laf.dev/send", //换自己的接口
       method: "post",
       data: obj,
       signal: controller.value.signal,
@@ -457,6 +457,7 @@ function handleConfirmD() {
     deleteIconRef.value.failToast();
   } else {
     list.value = [];
+    parentMessageId.value = ''
     deleteIconRef.value.successToast();
   }
 }
@@ -654,7 +655,7 @@ function handleSendText(text) {
   flex-direction: column;
   font-size: 15px;
   margin-left: 11px;
-  padding: 8px 0 8px 10px;
+  padding: 11px 0 9px 10px;
   line-height: 22px;
   background-color: white;
   border-radius: 5px;
