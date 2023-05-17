@@ -86,7 +86,6 @@ const dialogFormVisible = ref(false);
 const formLabelWidth = "140px";
 
 const props = defineProps({
-  showRoleList: { type: Boolean, default: false },
   isMobile: { type: Boolean, default: false },
 });
 const emits = defineEmits(["sendText"]);
@@ -98,7 +97,6 @@ const emits = defineEmits(["sendText"]);
 const form = reactive({
   text: "",
 });
-console.log(form);
 const showRoleList = ref(false);
 const searchKey = ref("");
 const searchColumns = ref(roleList);

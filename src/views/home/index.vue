@@ -1,182 +1,195 @@
 <template>
-  <div class="page" :class="{ 'page-change': list.length }">
+  <div class="home">
+    <menu-ele ref="menuRef" @allow-click="handleAllow"></menu-ele>
     <div
-      v-show="list.length"
-      id="myList"
-      ref="contentListRef"
-      :style="{ overflowY: isForbidScroll ? 'hidden' : 'auto' }"
+      class="page"
+      :class="{ 'page-change': list.length }"
+      @click="handleMenuShow"
     >
       <div
-        v-show="item.text"
-        :class="item.currentType === 'user' ? 'problemList' : 'answerList'"
-        v-for="(item, index) in list"
+        v-show="list.length"
+        id="myList"
+        ref="contentListRef"
+        :style="{ overflowY: isForbidScroll ? 'hidden' : 'auto' }"
       >
-        <img class="listImg" :src="item.avatar" alt="" />
-        <div v-if="item.currentType === 'bot'" class="botTextPack">
-          <div class="botListText" ref="botListRefs" v-html="item.text"></div>
-          <copy-icon-ele
-            class="moreFilled"
-            :iscanel="iscancel"
-            :is-use-copy="isUseCopy"
-            :is-mobile="isMobile"
-            :index="index"
-            @copy="handleCopyEle"
+        <div
+          v-show="item.text"
+          :class="item.currentType === 'user' ? 'problemList' : 'answerList'"
+          v-for="(item, index) in list"
+          :key="index"
+        >
+          <!-- <img class="listImg" src="/avatar.jpeg" alt="" v-show="item.currentType === 'user'"/>
+          <img class="listImg" src="/logo.jpg" alt="" v-show="item.currentType === 'bot'"/> -->
+          <img class="listImg" :src="item.avatar" alt="" />
+          <div v-if="item.currentType === 'bot'" class="botTextPack">
+            <div class="botListText" ref="botListRefs" v-html="item.text"></div>
+            <copy-icon-ele
+              class="moreFilled"
+              :iscanel="iscancel"
+              :is-use-copy="isUseCopy"
+              :is-mobile="isMobile"
+              :index="index"
+              @copy="handleCopyEle"
+            >
+            </copy-icon-ele>
+          </div>
+
+          <div v-else class="listText">{{ item.text }}</div>
+        </div>
+
+        <div v-show="loading" class="answerList">
+          <img class="listImg" src="/logo.jpg" alt="" />
+          <img class="addin" src="/loading.gif" alt="" />
+        </div>
+      </div>
+      <div v-show="!list.length" class="content-box cancel-style">
+        <div class="begintitle">
+          <h1>Chat Bot</h1>
+        </div>
+        <div v-show="isMobile" class="exhibition cancel-style mobile">
+          <div class="witem">
+            <el-icon :style="{ fontSize: '25px' }"><MagicStick /></el-icon>
+            <h3 class="title">功能</h3>
+            <p @click="handleHomeQuestion(1)">
+              还记得用户在对话中早些时候说的话 →
+            </p>
+            <p @click="handleHomeQuestion(4)">允许用户提供后续更正 →</p>
+            <p @click="handleHomeQuestion(7)">接受过拒绝不当请求的培训 →</p>
+          </div>
+          <div class="witem">
+            <el-icon :style="{ fontSize: '25px' }"><Sunny /></el-icon>
+            <h3 class="title">高效工作</h3>
+            <p @click="handleHomeQuestion(2)">用简单的术语解释量子计算 →</p>
+            <p @click="handleHomeQuestion(5)">10岁的生日有什么创意吗？ →</p>
+            <p @click="handleHomeQuestion(8)">
+              如何在Javascript中提出HTTP请求？ →
+            </p>
+          </div>
+          <div class="witem">
+            <el-icon :style="{ fontSize: '25px' }"><Warning /></el-icon>
+            <h3 class="title">限制</h3>
+            <p @click="handleHomeQuestion(3)">偶尔可能会生成错误的信息 →</p>
+            <p @click="handleHomeQuestion(6)">
+              偶尔可能会产生有害的指令或有偏见的内容 →
+            </p>
+            <p @click="handleHomeQuestion(9)">
+              对2021年后的世界和事件的了解有限 →
+            </p>
+          </div>
+        </div>
+        <div v-show="!isMobile" class="exhibition">
+          <div class="witem">
+            <el-icon :style="{ fontSize: '30px' }"><MagicStick /></el-icon>
+            <h3 class="title">功能</h3>
+          </div>
+          <div class="witem">
+            <el-icon :style="{ fontSize: '30px' }"><Sunny /></el-icon>
+            <h3 class="title">高效工作</h3>
+          </div>
+
+          <div class="witem">
+            <el-icon :style="{ fontSize: '30px' }"><Warning /></el-icon>
+            <h3 class="title">限制</h3>
+          </div>
+        </div>
+        <div v-show="!isMobile" class="pList">
+          <p
+            v-for="item in pList"
+            @click="handleHomeQuestion(item.qid)"
+            :key="item"
           >
-          </copy-icon-ele>
-        </div>
-
-        <div v-else class="listText">{{ item.text }}</div>
-      </div>
-
-      <div v-show="loading" class="answerList">
-        <img class="listImg" src="/logo.jpg" alt="" />
-        <img class="addin" src="/loading.gif" alt="" />
-      </div>
-    </div>
-    <div v-show="!list.length" class="content-box cancel-style">
-      <div class="begintitle">
-        <h1>Chat Bot</h1>
-      </div>
-      <div v-show="isMobile" class="exhibition cancel-style mobile">
-        <div class="witem">
-          <el-icon :style="{ fontSize: '25px' }"><MagicStick /></el-icon>
-          <h3 class="title">功能</h3>
-          <p @click="handleHomeQuestion(1)">
-            还记得用户在对话中早些时候说的话 →
-          </p>
-          <p @click="handleHomeQuestion(4)">允许用户提供后续更正 →</p>
-          <p @click="handleHomeQuestion(7)">接受过拒绝不当请求的培训 →</p>
-        </div>
-        <div class="witem">
-          <el-icon :style="{ fontSize: '25px' }"><Sunny /></el-icon>
-          <h3 class="title">高效工作</h3>
-          <p @click="handleHomeQuestion(2)">用简单的术语解释量子计算 →</p>
-          <p @click="handleHomeQuestion(5)">10岁的生日有什么创意吗？ →</p>
-          <p @click="handleHomeQuestion(8)">
-            如何在Javascript中提出HTTP请求？ →
-          </p>
-        </div>
-        <div class="witem">
-          <el-icon :style="{ fontSize: '25px' }"><Warning /></el-icon>
-          <h3 class="title">限制</h3>
-          <p @click="handleHomeQuestion(3)">偶尔可能会生成错误的信息 →</p>
-          <p @click="handleHomeQuestion(6)">
-            偶尔可能会产生有害的指令或有偏见的内容 →
-          </p>
-          <p @click="handleHomeQuestion(9)">
-            对2021年后的世界和事件的了解有限 →
+            {{ item.question }}
           </p>
         </div>
       </div>
-      <div v-show="!isMobile" class="exhibition">
-        <div class="witem">
-          <el-icon :style="{ fontSize: '30px' }"><MagicStick /></el-icon>
-          <h3 class="title">功能</h3>
-        </div>
-        <div class="witem">
-          <el-icon :style="{ fontSize: '30px' }"><Sunny /></el-icon>
-          <h3 class="title">高效工作</h3>
-        </div>
 
-        <div class="witem">
-          <el-icon :style="{ fontSize: '30px' }"><Warning /></el-icon>
-          <h3 class="title">限制</h3>
-        </div>
-      </div>
-      <div v-show="!isMobile" class="pList">
-        <p v-for="item in pList" @click="handleHomeQuestion(item.qid)">
-          {{ item.question }}
-        </p>
-      </div>
-    </div>
-
-    <!-- <div class="steppingstone">
+      <!-- <div class="steppingstone">
       
     </div> -->
-    <div class="bigBox">
-      <div
-        class="inputbox1"
-        :style="{ maxWidth: isMobile ? '1000px' : '743px' }"
-      >
-        <el-input
-          v-bind:readonly="loading"
-          @keypress="handleEnter"
-          v-model="question"
-          clearable
-          type="textarea"
-          :autosize="{ minRows: 1, maxRows: 8 }"
-          id="message"
-          placeholder="输入你的问题"
+      <div class="bigBox">
+        <div
+          class="inputbox1"
+          :style="{ maxWidth: isMobile ? '1000px' : '743px' }"
         >
-        </el-input>
+          <el-input
+            v-bind:readonly="loading"
+            @keypress="handleEnter"
+            v-model="question"
+            clearable
+            type="textarea"
+            :autosize="{ minRows: 1, maxRows: 8 }"
+            id="message"
+            placeholder="输入你的问题"
+          >
+          </el-input>
 
-        <el-button type="success" size="small" v-if="!iscancel" @click="send"
-          >发送</el-button
-        >
-        <el-button v-else type="danger" size="small" @click="handleCancel"
-          >终止</el-button
-        >
-        <div class="control">
-          <div class="role-icon">
-            <role-icon
-              size="23"
-              :is-show="!iscancel"
-              :is-mobile="isMobile"
-              ref="roleIconRef"
-              @click="handleRole"
-              @showRole="handleUseRole"
-            >
-            </role-icon>
-          </div>
-          <div class="context-icon">
-            <context-icon
-              :is-mobile="isMobile"
-              :is-show="!iscancel"
-              :is-used="isUseContext"
-              size="23"
-              @click="handleContext"
-              ref="contextIconRef"
-            >
-            </context-icon>
-          </div>
-          <div class="copy-icon">
-            <copy-icon
-              v-if="isMobile"
-              :is-mobile="isMobile"
-              :is-used="isUseCopy"
-              :is-show="!iscancel"
-              size="23"
-              @click="handleCopyIcon"
-              ref="copyIconRef"
-            ></copy-icon>
-          </div>
-          <div class="delete-icon">
-            <delete-icon
-              :is-mobile="isMobile"
-              :is-show="!iscancel"
-              size="23"
-              @click="handleDeleteList"
-              @confirm="handleConfirmD"
-              ref="deleteIconRef"
-            ></delete-icon>
+          <el-button type="success" size="small" v-if="!iscancel" @click="send"
+            >发送</el-button
+          >
+          <el-button v-else type="danger" size="small" @click="handleCancel"
+            >终止</el-button
+          >
+          <div class="control">
+            <div class="role-icon">
+              <role-icon
+                size="23"
+                :is-show="!iscancel"
+                :is-mobile="isMobile"
+                ref="roleIconRef"
+                @click="handleRole"
+                @showRole="handleUseRole"
+              >
+              </role-icon>
+            </div>
+            <div class="context-icon">
+              <context-icon
+                :is-mobile="isMobile"
+                :is-show="!iscancel"
+                :is-used="isUseContext"
+                size="23"
+                @click="handleContext"
+                ref="contextIconRef"
+              >
+              </context-icon>
+            </div>
+            <div class="copy-icon">
+              <copy-icon
+                v-if="isMobile"
+                :is-mobile="isMobile"
+                :is-used="isUseCopy"
+                :is-show="!iscancel"
+                size="23"
+                @click="handleCopyIcon"
+                ref="copyIconRef"
+              ></copy-icon>
+            </div>
+            <!-- <div class="delete-icon">
+              <delete-icon
+                :is-mobile="isMobile"
+                :is-show="!iscancel"
+                size="23"
+                @click="handleDeleteList"
+                @confirm="handleConfirmD"
+                ref="deleteIconRef"
+              ></delete-icon>
+            </div> -->
           </div>
         </div>
-      </div>
-      <div class="roleList">
-        <role-list
-          :show="showRoleList"
-          :is-mobile="isMobile"
-          ref="roleListRef"
-          @sendText="handleSendText"
-        >
-        </role-list>
+        <div class="roleList">
+          <role-list
+            :is-mobile="isMobile"
+            ref="roleListRef"
+            @sendText="handleSendText"
+          >
+          </role-list>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick } from "vue";
+import { ref, onMounted, nextTick, watch, watchEffect } from "vue";
 //组件
 import DeleteIcon from "@/components/DeleteIconVant.vue";
 import ContextIcon from "@/components/ContextIconVant.vue";
@@ -184,20 +197,32 @@ import CopyIcon from "@/components/CopyIconVant.vue";
 import CopyIconEle from "@/components/CopyIconEle.vue";
 import RoleIcon from "@/components/RoleIconVant.vue";
 import RoleList from "@/components/RoleList.vue";
+import MenuEle from "@/components/MenuEle.vue";
 import { ElMessage } from "element-plus";
+//网络请求
+import { sendInfo } from "@/api/request";
 //插件
 import axios from "axios";
-import MarkdownIt from "markdown-it";
-import hljs from "highlight.js";
 import useClipboard from "vue-clipboard3";
+
 //函数
 import resetSizeFun from "@/util/fontSize";
+import md from "@/util/initMarkDown";
+//常量
+import pList from "@/constant/questionList";
+//状态管理
+import useHomeStore from "@/stores/home";
+import { storeToRefs } from "pinia";
 
+// const result = data.map(item => [
+//   { avatar: "/avatar.jpeg", currentType: "user", text: item.question },
+//   { avatar: "/logo.jpg", currentType: "bot", text: item.answer }
+// ]);
 //重置微信页字体大小
 resetSizeFun();
-
+const isProhibition = ref(false); //是否禁止点击
+const menuRef = ref(); //菜单对象
 const roleListRef = ref(); //角色列表对象
-const showRoleList = ref(false); //是否展示角色列表
 const roleIconRef = ref(); // 是否使用角色的对象
 const isUseCopy = ref(false); //是否启用上下文
 const copyIconRef = ref(); //是否启用复制的对象
@@ -217,42 +242,65 @@ const botListRefs = ref(); //回答内容盒子对象列表
 const isMobile = ref(false);
 //取消请求的对象
 const controller = ref(new AbortController());
-//首页问题
-const pList = [
-  { qid: 1, question: "还记得用户在对话中早些时候说的话 →" },
-  { qid: 2, question: "用简单的术语解释量子计算 →" },
-  { qid: 3, question: "偶尔可能会生成错误的信息 →" },
-  { qid: 4, question: "允许用户提供后续更正 →" },
-  { qid: 5, question: "10岁的生日有什么创意吗？ →" },
-  { qid: 6, question: "偶尔可能会产生有害的指令或有偏见的内容 →" },
-  { qid: 7, question: "接受过拒绝不当请求的培训 →" },
-  { qid: 8, question: "如何在Javascript中提出HTTP请求？ →" },
-  { qid: 9, question: "对2021年后的世界和事件的了解有限 →" },
-];
 
 let initHeight = window.innerHeight;
 //监听变化修改样式
 onMounted(() => {
-  //判断是否是手机
+  //判断是否是手
   isMobileFun();
   window.addEventListener("resize", () => {
+    console.log("resize");
     isMobileFun();
     handleH5Input();
   });
 });
 
+//聊天记录
+const homeStore = useHomeStore();
+const { chatLogList, currentLogIndex, currentLog } = storeToRefs(homeStore);
+homeStore.currentLog = chatLogList.value[currentLogIndex.value];
+watchEffect(() => {
+  //无任何记录时展示首页
+  if (chatLogList.value.length < 1) {
+    list.value = [];
+    return;
+  }
+  //首次进入展示首页
+  if (!currentLog.value) {
+    return;
+  }
+  list.value = currentLog.value.chatLog.list
+    .map((item) => [
+      {
+        avatar: "/avatar.jpeg",
+        currentType: "user",
+        text: item.question,
+        id: item.qid,
+      },
+      {
+        avatar: "/logo.jpg",
+        currentType: "bot",
+        text: item.answer,
+        id: item.aid,
+      },
+    ])
+    .flat();
+});
+
 function isMobileFun() {
   if (screen.width < 768) {
     isMobile.value = true;
+    handleMenuShow();
   } else {
     isMobile.value = false;
+    menuRef.value.isShowMenu = true;
   }
 }
 
 //发送消息
 async function send() {
-  //判断是否是编程问题
-  const message = question.value
+  const message = question.value;
+  //空白禁止发送
   if (message.trim() == "") {
     ElMessage({
       showClose: true,
@@ -261,10 +309,20 @@ async function send() {
     });
     return;
   }
-  list.value.push({
-    text: question.value,
-    currentType: "user",
-    avatar: "/avatar.jpeg",
+  if (currentLogIndex.value === -1) {
+    menuRef.value.handleNewLog();
+  }
+  nextTick(() => {
+    list.value.push({
+      text: message,
+      currentType: "user",
+      avatar: "/avatar.jpeg",
+    });
+    list.value.push({
+      text: "",
+      currentType: "bot",
+      avatar: "/logo.jpg",
+    });
   });
 
   setScreen();
@@ -273,111 +331,15 @@ async function send() {
   iscancel.value = true;
 
   try {
-    // const md = new MarkdownIt({
-    //   highlight: function (str, lang) {
-    //     if (lang && hljs.getLanguage(lang)) {
-    //       try {
-    //         return (
-    //           '<pre class="hljs mark-body"><code>' +
-    //           hljs.highlight(lang, str, true).value +
-    //           "</code></pre>"
-    //         );
-    //       } catch (__) {}
-    //     }
-    //     return (
-    //       '<pre class="hljs mark-body" ><code>' +
-    //       md.utils.escapeHtml(
-    //         str.replace(/[\r\n]+/g, "\n").replace(/(\d)\./g, "$1、")
-    //       ) +
-    //       "</code></pre>"
-    //     );
-    //   },
-    // });
-    const md = new MarkdownIt({
-      linkify: true,
-      highlight(str, lang) {
-        if (lang && hljs.getLanguage(lang)) {
-          try {
-            // 得到经过highlight.js之后的html代码
-            const preCode = hljs.highlight(lang, str, true).value;
-            // 以换行进行分割
-            const lines = preCode.split(/\n/).slice(0, -1);
-            // 添加自定义行号
-            let html = lines
-              .map((item, index) => {
-                return (
-                  '<li><span class="line-num" data-line="' +
-                  (index + 1) +
-                  '"></span>' +
-                  item +
-                  "</li>"
-                );
-              })
-              .join("");
-            html = "<ol>" + html + "</ol>";
-            // 添加代码语言
-            if (lines.length) {
-              html += '<b class="name">' + lang + "</b>";
-            }
-            return '<pre class="hljs"><code>' + html + "</code></pre>";
-          } catch (__) {}
-        }
-        // 未添加代码语言，此处与上面同理
-        const preCode = md.utils.escapeHtml(str);
-        const lines = preCode.split(/\n/).slice(0, -1);
-        let html = lines
-          .map((item, index) => {
-            return (
-              '<li><span class="line-num" data-line="' +
-              (index + 1) +
-              '"></span>' +
-              item +
-              "</li>"
-            );
-          })
-          .join("");
-        html = "<ol>" + html + "</ol>";
-        return '<pre class="hljs"><code>' + html + "</code></pre>";
-      },
-    });
-
-    list.value.push({
-      text: "",
-      currentType: "bot",
-      avatar: "/logo.jpg",
-    });
-
     const obj = { message };
     obj.parentMessageId = contextControlParams();
-    console.log("obj.parentMessageId", obj.parentMessageId);
-    axios({
-      url: "https://ui4wpz.laf.dev/send", //换自己的接口
-      method: "post",
+    sendInfo({
       data: obj,
       signal: controller.value.signal,
       responseType: "text",
-
-      onDownloadProgress: function (progressEvent) {
-        const xhr = progressEvent.event.target;
-        let { responseText } = xhr;
-        let text = responseText;
-        if (text.indexOf("invoke cloud function got error") !== -1) {
-          text = "请求过于频繁,请稍后再试&nbsp;&nbsp;";
-          list.value[list.value.length - 1].text = text;
-        } else {
-          const parts = text.split("--!");
-          parentMessageId.value = parts[1];
-          list.value[list.value.length - 1].text = md.render(parts[0])
-          
-        }
-        loading.value = false;
-        setScreen();
-      },
+      onDownloadProgress: downloadPro,
     })
       .then(() => {
-        controller.value = new AbortController();
-        iscancel.value = false;
-        isForbidScroll.value = false;
       })
       .catch(function (thrown) {
         iscancel.value = false;
@@ -385,7 +347,16 @@ async function send() {
         if (axios.isCancel(thrown)) {
           console.log("Request canceled", thrown.message);
         }
+      })
+      .finally(() => {
+        sendInfolater();
       });
+    // axios({
+    // url: "https://i07t1z.laf.dev/send", //换自己的接口
+    // method: "post",
+
+    // },
+    // })
 
     // 返回 id 并保存
   } catch (error) {
@@ -398,6 +369,23 @@ async function send() {
     setScreen();
     return;
   }
+}
+
+//流式处理
+function downloadPro(progressEvent) {
+  const xhr = progressEvent.event.target;
+  let { responseText } = xhr;
+  let text = responseText;
+  if (text.indexOf("invoke cloud function got error") !== -1) {
+    text = "请求过于频繁,请稍后再试&nbsp;&nbsp;";
+    list.value[list.value.length - 1].text = text;
+  } else {
+    const parts = text.split("--!");
+    parentMessageId.value = parts[1];
+    list.value[list.value.length - 1].text = md.render(parts[0]);
+  }
+  loading.value = false;
+  setScreen();
 }
 
 //发送消息适配PC或phone
@@ -422,8 +410,8 @@ function handleCancel() {
 function setScreen(keyboardHeight = 0) {
   nextTick(() => {
     setTimeout(() => {
-      const scrollHeight = contentListRef.value.scrollHeight;
-      const clientHeight = contentListRef.value.clientHeight;
+      const scrollHeight = contentListRef.value.scrollHeight || 0;
+      // const clientHeight = contentListRef.value.clientHeight;
       contentListRef.value.scrollTop = scrollHeight + keyboardHeight;
     }, 0);
   });
@@ -431,12 +419,16 @@ function setScreen(keyboardHeight = 0) {
 
 //处理首页问题点击
 function handleHomeQuestion(qid) {
-  console.log(qid);
-  const questionObj = pList.find((item) => item.qid === qid);
-  console.log(questionObj);
-  const currQuestion = questionObj.question.replace("→", "").trim();
-  question.value = currQuestion;
-  send();
+  setTimeout(() => {
+    console.log("isProhibition.value", isProhibition.value);
+    if (isProhibition.value) {
+      return;
+    }
+    const questionObj = pList.find((item) => item.qid === qid);
+    const currQuestion = questionObj.question.replace("→", "").trim();
+    question.value = currQuestion;
+    send();
+  });
 }
 
 //移动端点击输入框内容在上处理
@@ -457,7 +449,7 @@ function handleConfirmD() {
     deleteIconRef.value.failToast();
   } else {
     list.value = [];
-    parentMessageId.value = ''
+    parentMessageId.value = "";
     deleteIconRef.value.successToast();
   }
 }
@@ -514,6 +506,41 @@ function handleUseRole() {
 function handleSendText(text) {
   question.value = text;
 }
+
+//点击空白处，隐藏聊天菜单
+function handleMenuShow() {
+  if (isMobile.value) {
+    menuRef.value.isShowMenu = false;
+    isProhibition.value = false;
+  }
+}
+//菜单隐藏后允许点击
+function handleAllow() {
+  console.log(";11111");
+  if (isMobile.value) isProhibition.value = true;
+}
+
+//发送信息后要做的事情
+function sendInfolater() {
+  //保存信息到服务器
+  const lastMessageIndex = list.value.length - 1;
+  const secondLastMessageIndex = lastMessageIndex - 1;
+  const result = {
+    question: list.value[secondLastMessageIndex].text,
+    answer: list.value[lastMessageIndex].text,
+  };
+  homeStore.addChatLogTalkAction(result);
+  //更改标题为第一个问题
+  if (currentLog.value.title === "新建聊天") {
+    const data = { id: currentLog.value["_id"], title: result.question };
+    console.log("data", data);
+    menuRef.value.changeTitleFirst(data);
+  }
+  //创建新的控制,方便暂停
+  controller.value = new AbortController();
+  iscancel.value = false;
+  isForbidScroll.value = false;
+}
 </script>
 
 <style scoped lang="scss">
@@ -569,6 +596,29 @@ function handleSendText(text) {
   overflow-y: auto;
   padding-bottom: 12px;
   background-color: #f1f1f4;
+}
+
+/* 定义滚动条的宽度和颜色 */
+::-webkit-scrollbar {
+  width: 5px;
+  background-color: #f1f1f4;
+}
+/* 定义滚动条的轨道背景 */
+::-webkit-scrollbar-track {
+  background-color: #f1f1f4;
+}
+/* 定义滚动条的轨道背景 */
+::-webkit-scrollbar-track:hover {
+  background-color: #202123;
+}
+/* 定义滚动条的滑块样式 */
+::-webkit-scrollbar-thumb {
+  background-color: #c3c3c9;
+  border-radius: 5px;
+}
+/* 鼠标悬浮在滚动条上时的滑块样式 */
+::-webkit-scrollbar-thumb:hover {
+  background-color: #a0a0a8;
 }
 
 .problemList {
@@ -854,7 +904,7 @@ textarea {
   p:hover {
     cursor: pointer;
     color: #fff;
-    background-color: rgb(144, 210, 110);
+    background-color: #32333e;
   }
   width: 100%;
   display: flex;

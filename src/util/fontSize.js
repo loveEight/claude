@@ -1,5 +1,4 @@
 const restSize = function() {
-    console.log('reset')
     if (typeof WeixinJSBridge == 'object' && typeof WeixinJSBridge.invoke == 'function') {
         handleFontSize()
     } else {
