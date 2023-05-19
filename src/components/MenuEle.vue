@@ -1,84 +1,113 @@
 <template>
-  <div class="menu" :class="{ menuColl: !isShowMenu }" ref="menuRef">
-    <!-- 新建聊天 -->
-    <div class="newChat">
-      <div class="content" @click="handleNewLog">
-        <van-icon name="plus" size="15" />
-        <span class="text">新建聊天</span>
+  <div
+    class="menuEle"
+    :style="{ width: isShowMenu && isMobile ? '100vw' : 'auto' }"
+  >
+    <div class="menu" :class="{ menuColl: !isShowMenu }" ref="menuRef">
+      <!-- 新建聊天 -->
+      <div class="newChat" >
+        <div class="content" @click="handleNewLog">
+          <van-icon name="plus" size="15" />
+          <span class="text">新建聊天</span>
+        </div>
       </div>
-    </div>
-    <!-- 聊天记录 -->
-    <div class="LogList">
-      <template v-for="(item, index) in logList" :key="index">
-        <div
-          class="chatLog"
-          :class="{ logActive: currentIndex === index }"
-          @click="handleClickBox(index)"
-        >
-          <!-- 记录标题 -->
-          <div class="chatbox">
-            <van-icon name="comment-o" size="16" />
-            <input
-              type="text"
-              v-model="logTitle"
-              ref="inputRef"
-              v-if="isShowInput && currentIndex === index"
+      <!-- 无记录显示 -->
+      <div class="noData" v-if="!chatLogList.length">
+        <no-data></no-data>
+        <p>无记录</p>
+      </div>
+      <!-- 聊天记录 -->
+      <div class="LogList">
+        <template v-for="(item, index) in logList" :key="index">
+          <div
+            class="chatLog"
+            :class="{ logActive: currentIndex === index }"
+            @click="handleClickBox(index)"
+          >
+            <!-- 记录标题 -->
+            <div class="chatbox">
+              <van-icon name="comment-o" size="16" />
+              <input
+                type="text"
+                v-model="logTitle"
+                ref="inputRef"
+                v-if="isShowInput && currentIndex === index"
+              />
+              <span v-else>{{ item.title }}</span>
+            </div>
+            <!-- 记录设置 -->
+            <div class="logSet" v-show="currentIndex === index">
+              <div class="iconList" v-if="!isConirfmIcon">
+                <van-icon
+                  name="edit"
+                  size="16"
+                  @click.stop="handleEidtTitle(item)"
+                />
+                <van-icon
+                  name="delete-o"
+                  size="16"
+                  @click.stop="handleDeleteLog(item, index)"
+                />
+              </div>
+              <div class="iconList2" v-else>
+                <van-icon
+                  name="success"
+                  size="16"
+                  @click.stop="handleConfirm(item, index)"
+                />
+                <van-icon name="cross" size="16" @click.stop="handleCancel" />
+              </div>
+            </div>
+          </div>
+        </template>
+      </div>
+      <!-- 其他设置 -->
+      <div class="setting">
+        <div class="content" @click="handleClearLog">
+          <van-icon name="delete-o" size="16" color="#fff" />
+          <span class="text" v-if="!isClearConfirm">清空对话</span>
+          <span class="ask" v-else>确定吗？</span>
+          <div class="iconList2" v-if="isClearConfirm">
+            <van-icon
+              name="success"
+              size="16"
+              @click.stop="handleConfirmClear"
             />
-            <span v-else>{{ item.title }}</span>
+            <van-icon name="cross" size="16" @click.stop="handleCancelClear" />
           </div>
-          <!-- 记录设置 -->
-          <div class="logSet" v-show="currentIndex === index">
-            <div class="iconList" v-if="!isConirfmIcon">
-              <van-icon
-                name="edit"
-                size="16"
-                @click.stop="handleEidtTitle(item)"
-              />
-              <van-icon
-                name="delete-o"
-                size="16"
-                @click.stop="handleDeleteLog(item, index)"
-              />
-            </div>
-            <div class="iconList2" v-else>
-              <van-icon
-                name="success"
-                size="16"
-                @click.stop="handleConfirm(item, index)"
-              />
-              <van-icon name="cross" size="16" @click.stop="handleCancel" />
-            </div>
-          </div>
-        </div>
-      </template>
-    </div>
-    <!-- 其他设置 -->
-    <div class="setting">
-      <div class="content" @click="handleClearLog">
-        <van-icon name="delete-o" size="16" color="#fff" />
-        <span class="text" v-if="!isClearConfirm">清空对话</span>
-        <span class="ask" v-else>确定吗？</span>
-        <div class="iconList2" v-if="isClearConfirm">
-          <van-icon name="success" size="16" @click.stop="handleConfirmClear" />
-          <van-icon name="cross" size="16" @click.stop="handleCancelClear" />
         </div>
       </div>
+      <!--关闭menu -->
+      <div class="showMenu">
+        <menu-chang-icon-vant :is-show="isShowMenu" @control="handleControl" />
+      </div>
     </div>
-    <!--关闭menu -->
-    <div class="showMenu">
-      <menu-chang-icon-vant :is-show="isShowMenu" @control="handleControl" />
-    </div>
+    <div
+      class="stonebg"
+      @click="isShowMenu = false"
+      :style="{ width: isShowMenu ? '100%' : '0' }"
+    ></div>
   </div>
 </template>
 
 <script setup>
 import { ref, nextTick, watch, computed } from "vue";
-import MenuChangIconVant from "@/components/MenuChangIconVant.vue";
+
 import useHomeStore from "@/stores/home";
 import { storeToRefs } from "pinia";
+
+import NoData from "@/components/svg/NoDataSvg.vue";
+import MenuChangIconVant from "@/components/MenuChangIconVant.vue";
+
 import { ElLoading } from "element-plus";
+
+const props = defineProps({
+  isMobile: { type: Boolean, default: false },
+});
+
 const homeStore = useHomeStore();
-const { chatLogList, currentLogIndex } = storeToRefs(homeStore);
+const { chatLogList, currentLogIndex, parentMessageId, isNowSend } =
+  storeToRefs(homeStore);
 
 //获取所有聊天记录
 homeStore.queryChatLogAction();
@@ -112,7 +141,7 @@ const currentIndex = computed(() => {
 //   { id: 1, title: "你好啊" },
 //   { id: 1, title: "你好啊" },
 // ]); //聊天记录
-const menuRef = ref() //菜单对象
+const menuRef = ref(); //菜单对象
 const isShowInput = ref(false); //是否展示输入框
 const logTitle = ref(""); //记录标题
 const isConirfmIcon = ref(false); //是否展示确认修改或删除标题的按钮
@@ -125,17 +154,12 @@ let iconType = "edit"; //当前是修改标题还是删除记录
 const handleClickBox = (index) => {
   //防止重复点击
   if (currentLogIndex.value === index) return;
-  //加载loading,提高用户体验
+  //手机点击时隐藏菜单
+  if (props.isMobile) {
+    isShowMenu.value = false;
+  }
   currentLogIndex.value = index;
-  // const loadingScreen = ElLoading.service({
-  //   lock: true,
-  //   text: "Loading",
-  //   background: "rgba(0, 0, 0, 0.7)",
-  // });
-  // setTimeout(() => {
-  //   loadingScreen.close();
-
-  // }, 500);
+  //清理对话ID
   homeStore.currentLog = chatLogList.value[currentLogIndex.value];
 };
 
@@ -166,6 +190,7 @@ const handleDeleteLog = (item, index) => {
 
 //设置聊天标题
 const handleEidtTitle = (item) => {
+  isNowSend.value = false;
   iconType = "edit";
   logTitle.value = item.title;
   isShowInput.value = true;
@@ -175,13 +200,13 @@ const handleEidtTitle = (item) => {
     // if (inputRef.value) console.log(typeof inputRef.value)
   });
 };
-//确认修改/删除
+//确认修改/删
 const handleConfirm = (item, index) => {
   if (iconType === "edit") {
     //修改标题
-    if(chatLogList.value[index].title === logTitle.value) {
+    if (chatLogList.value[index].title === logTitle.value) {
       handleCancel();
-      return
+      return;
     }
     chatLogList.value[index].title = logTitle.value;
     //网络请求
@@ -189,7 +214,12 @@ const handleConfirm = (item, index) => {
     homeStore.updateChatLogTitleAction(data);
   } else {
     //删除单个记录
-    currentLogIndex.value = 0;
+    if (chatLogList.value.length === 1) {
+      currentLogIndex.value = -1;
+    } else {
+      currentLogIndex.value = 0;
+    }
+
     chatLogList.value.splice(index, 1);
     //发送网络请求，用item.id删除
     homeStore.currentLog = chatLogList.value[currentLogIndex.value];
@@ -224,9 +254,16 @@ const handleCancelClear = () => {
 };
 //currentIndex改变时取消取消修改标题
 watch(currentIndex, (neV) => {
+  parentMessageId.value = "";
   if (inputRef.value) handleCancel();
 });
 
+watch(chatLogList, (nev) => {
+  //如果长度为0
+  if (!nev.length) {
+    currentLogIndex.value = -1;
+  }
+});
 //控制是否展示菜单
 const handleControl = (isShow) => {
   isShowMenu.value = isShow;
@@ -242,12 +279,12 @@ const changeTitleFirst = (data) => {
 };
 
 //监听是否隐藏，解决手机点击隐藏问题
-const emits = defineEmits(['allowClick'])
-watch(isShowMenu, (newV) => {
-  if(newV === false) {
-    emits('allowClick')
-  }
-})
+// const emits = defineEmits(['allowClick'])
+// watch(isShowMenu, (newV) => {
+//   if(newV === false) {
+//     emits('allowClick')
+//   }
+// })
 
 defineExpose({
   handleNewLog,
@@ -257,16 +294,18 @@ defineExpose({
 </script>
 
 <style lang="less" scoped>
-.menu {
+.menuEle {
   position: absolute;
   left: 0;
   top: 0;
+  z-index: 9999;
+}
+.menu {
   width: 240px;
   padding: 7px;
   height: 100vh;
   color: #fff;
   background-color: #202123;
-  z-index: 9999;
   font-size: 14px;
   border-right: none;
   transition: width 0.3s ease;
@@ -292,6 +331,16 @@ defineExpose({
         background-color: #28292c;
       }
     }
+  }
+
+  .noData {
+    margin-top: 32px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+    color: #909091;
   }
 
   .LogList {
@@ -435,6 +484,9 @@ defineExpose({
 .menuColl {
   width: 0;
   padding: 0;
+  .noData {
+    display: none;
+  }
   .LogList {
     display: none;
   }
@@ -470,8 +522,37 @@ defineExpose({
 }
 
 @media screen and (max-width: 600px) {
+  .menuEle {
+    width: 100vw;
+    display: flex;
+    .menu {
+      position: relative;
+    }
+    .stonebg {
+      width: 100%;
+      background-color: rgba(0, 0, 0, 0.6);
+      transition: width 0.3s ease;
+    }
+  }
   .LogList {
     height: 346px !important;
+  }
+  .logSet {
+    .iconList {
+      .van-icon {
+        // margin-right: px !important;
+        right: 15px !important;
+      }
+    }
+
+    .iconList2 {
+      .van-icon {
+        left: -5px !important;
+      }
+      .van-icon:first-child {
+        left: -15px !important;
+      }
+    }
   }
 }
 </style>

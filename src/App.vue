@@ -20,7 +20,7 @@ import 'vant/es/image-preview/style';
 html{
   padding: 0;
   margin: 0;
-  background-color: #f1f1f4;
+  background-color: #ffffff;
 }
 .app {
   width: 100vw;

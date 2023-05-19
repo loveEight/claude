@@ -15,7 +15,9 @@ const useHomeStore = defineStore('home', {
   state: () => ({
     chatLogList: [], //所有对话记录
     currentLogIndex: -1,  //当前对话记录索引
-    currentLog: {}
+    currentLog: { title: '新建聊天' },
+    parentMessageId: '',
+    isNowSend: false
   }),
   actions: {
     //查询所有对话记录
@@ -25,6 +27,7 @@ const useHomeStore = defineStore('home', {
     },
     //新增对话
     addChatLogNewAction() {
+      this.parentMessageId = ''
       addChatLogNew().then(() => {
         queryChatLog().then((res) => {
           const chatLogList = res.data.reverse()
@@ -34,6 +37,7 @@ const useHomeStore = defineStore('home', {
     },
     //删除对话
     deleteChatLogNewAction(id) {
+      this.parentMessageId = ''
       deleteChatLog(id)
     },
     //更新对话标题
@@ -42,15 +46,18 @@ const useHomeStore = defineStore('home', {
     },
     //清空所有对话记录
     clearChatLogAction() {
+      this.parentMessageId = ''
       clearChatLog()
     },
     //在一次对话中增加聊天记录
     addChatLogTalkAction(newTalk) {
-      const id = this.currentLog["_id"]
-      const data = { id, newTalk }
-      addChatLogTalk(data)
-      this.chatLogList[this.currentLogIndex].chatLog.list.push(newTalk)
-      console.log('this.chatLogList[this.currentLogIndex]', this.chatLogList[this.currentLogIndex])
+      setTimeout(() => {
+        const id = this.currentLog["_id"]
+        const data = { id, newTalk }
+        addChatLogTalk(data)
+        this.chatLogList[this.currentLogIndex].chatLog.list.push(newTalk)
+        console.log('this.chatLogList[this.currentLogIndex]', this.chatLogList[this.currentLogIndex])
+      },300)
     }
   }
 })
