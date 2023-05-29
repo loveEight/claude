@@ -206,7 +206,7 @@ const isForbidScroll = ref(false); //是否禁止滚动
 const keyboardHeight = ref(0); //手机键盘高度
 const list = ref([]); //展示列表
 const question = ref(""); //问题
-// const parentMessageId = ref(""); //上下文id
+const parentMessageId = ref(""); //上下文id
 const loading = ref(false); //是否在加载状态
 const iscancel = ref(false); //取消按钮是否启动
 const contentListRef = ref(); //主要内容盒子对象
@@ -270,6 +270,7 @@ async function send() {
 
   try {
     const obj = { message };
+    obj.parentMessageId = parentMessageId.value;
     sendInfo({
       data: obj,
       signal: controller.value.signal,
@@ -304,20 +305,24 @@ async function send() {
 function downloadPro(progressEvent) {
   const xhr = progressEvent.event.target;
   let { responseText } = xhr;
-
-  const lastIndex = responseText.lastIndexOf("claude", responseText.length - 2);
-  let chunk = responseText;
+  const lastIndex = responseText.lastIndexOf("⭐");
+  let chunk = '';
 
   if (lastIndex !== -1) {
     chunk = responseText.substring(lastIndex);
+    chunk = chunk.replace("⭐", " ")
   }
   //限制接口
   console.log("chunk", chunk);
-  chunk.replace("_Typing…_", "");
-  if (chunk.indexOf("```") !== -1) {
-    list.value[list.value.length - 1].text = md.render(chunk);
+
+  const parts = chunk.split("--!");
+
+  parentMessageId.value = parts[1];
+  console.log('parts[0]', parts[0])
+  if (parts[0].indexOf("```") !== -1) {
+    list.value[list.value.length - 1].text = md.render(parts[0]);
   } else {
-    list.value[list.value.length - 1].text = chunk;
+    list.value[list.value.length - 1].text = parts[0];
   }
   loading.value = false;
   setScreen();
@@ -352,7 +357,8 @@ function handleCancel() {
 function setScreen(keyboardHeight = 0) {
   nextTick(() => {
     setTimeout(() => {
-      const scrollHeight = contentListRef.value.scrollHeight || 0;
+      
+      const scrollHeight = contentListRef.value?.scrollHeight || 0;
       // const clientHeight = contentListRef.value.clientHeight;
       contentListRef.value.scrollTop = scrollHeight + keyboardHeight;
     }, 0);
