@@ -1,5 +1,5 @@
 //图片加载失败所显示的默认图片
-import defaltImg from '@/assets/ima/200.png'
+import defaltImg from '@/assets/img/200.png'
 
 // 引入监听是否进入视口
 import { useIntersectionObserver } from '@vueuse/core'

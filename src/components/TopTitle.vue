@@ -1,21 +1,14 @@
 <template>
   <div class="topTitle">
-    <h2 class="title" v-if="isMobile">{{ currentLog?.title }}</h2>
-    <h2 class="title2">{{ "模型: GPT-3.5" }}</h2>
+    <h2 class="title2">{{ "模型: Claude" }}</h2>
   </div>
 </template>
 
 <script setup>
-import { onMounted } from "vue";
-import useHomeStore from "@/stores/home";
-import { storeToRefs } from "pinia";
-
 const props = defineProps({
   isMobile: { type: Boolean, default: false },
 });
 
-const homestore = useHomeStore();
-const { currentLog } = storeToRefs(homestore);
 </script>
 
 <style lang="less" scoped>

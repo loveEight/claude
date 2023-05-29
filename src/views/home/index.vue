@@ -1,6 +1,5 @@
 <template>
   <div class="home">
-    <menu-ele ref="menuRef" :is-mobile="isMobile"></menu-ele>
     <div
       class="page"
       :style="{ paddingBottom: isMobile ? '165px' : '' }"
@@ -28,7 +27,7 @@
                 item.currentType === 'user' ? 'problemList' : 'answerList'
               "
             >
-              <openai-svg
+              <!-- <openai-svg
                 class="listImg2"
                 :width="30"
                 :height="30"
@@ -39,16 +38,28 @@
                 :width="30"
                 :height="30"
                 v-show="item.currentType === 'user'"
+              /> -->
+              <img
+                class="listImg"
+                src="/avatar.jpeg"
+                alt=""
+                v-show="item.currentType === 'user'"
               />
-              <!-- <img class="listImg" src="/avatar.jpeg" alt="" v-show="item.currentType === 'user'"/> -->
+              <img
+                class="listImg"
+                src="/logo1.png"
+                alt=""
+                v-show="item.currentType === 'bot'"
+              />
               <!-- <img class="listImg"  :src="item.avatar" alt="" /> -->
-              <div v-if="item.currentType === 'bot'">
-                <div
-                  class="botListText"
-                  ref="botListRefs"
-                  v-html="item.text"
-                ></div>
-                <!-- <copy-icon-ele
+              <div
+                v-if="item.currentType === 'bot'"
+                class="botListText"
+                ref="botListRefs"
+              >
+                <div class="markdown-body" v-html="item.text"></div>
+              </div>
+              <!-- <copy-icon-ele
                   class="moreFilled"
                   :iscanel="iscancel"
                   :is-use-copy="isUseCopy"
@@ -57,7 +68,6 @@
                   @copy="handleCopyEle"
                 >
                 </copy-icon-ele> -->
-              </div>
               <!-- <img v-if="item.currentType === 'bot'" class="addin" src="/loading.gif" alt="" /> -->
               <div v-else class="listText">{{ item.text }}</div>
             </div>
@@ -70,10 +80,10 @@
           </div>
           <div v-show="loading" class="listItemA">
             <div class="answerList" :style="{ paddingBottom: '16px' }">
-              <!-- <img class="listImg" src="/logo.jpg" alt="" /> -->
-              <openai-svg class="listImg" :width="30" :height="30" />
-              <!-- <img class="addin" src="/loading.gif" alt="" /> -->
-              <div class="botTextPack"></div>
+              <img class="listImg" src="/logo1.png" alt="" />
+              <div class="botListText">
+                <div>_Typing…_</div>
+              </div>
             </div>
           </div>
         </div>
@@ -138,56 +148,6 @@
     </div> -->
       <div class="bigBox">
         <div
-          class="controlBox"
-          :style="{ maxWidth: isMobile ? '1000px' : '672px' }"
-        >
-          <div class="control">
-            <div class="role-icon">
-              <role-icon
-                size="23"
-                :is-show="!iscancel"
-                :is-mobile="isMobile"
-                ref="roleIconRef"
-                @click="handleRole"
-                @showRole="handleUseRole"
-              >
-              </role-icon>
-            </div>
-            <div class="context-icon">
-              <context-icon
-                :is-mobile="isMobile"
-                :is-show="!iscancel"
-                :is-used="isUseContext"
-                size="23"
-                @click="handleContext"
-                ref="contextIconRef"
-              >
-              </context-icon>
-            </div>
-            <!-- <div class="copy-icon">
-              <copy-icon
-                v-if="isMobile"
-                :is-mobile="isMobile"
-                :is-used="isUseCopy"
-                :is-show="!iscancel"
-                size="23"
-                @click="handleCopyIcon"
-                ref="copyIconRef"
-              ></copy-icon>
-            </div> -->
-            <!-- <div class="delete-icon">
-              <delete-icon
-                :is-mobile="isMobile"
-                :is-show="!iscancel"
-                size="23"
-                @click="handleDeleteList"
-                @confirm="handleConfirmD"
-                ref="deleteIconRef"
-              ></delete-icon>
-            </div> -->
-          </div>
-        </div>
-        <div
           class="inputbox1"
           :style="{ maxWidth: isMobile ? '1000px' : '672px' }"
         >
@@ -202,25 +162,17 @@
             placeholder="输入你的问题"
           >
           </el-input>
-          <el-button type="info" size="small" v-if="!iscancel" @click="send"
-            ><el-icon><Position /></el-icon
-          ></el-button>
+          <el-button type="primary" size="small" v-if="!iscancel" @click="send"
+            >发送</el-button
+          >
           <el-button v-else type="danger" size="small" @click="handleCancel"
-            ><el-icon><SwitchButton /></el-icon></el-button
+            >停止</el-button
           >
         </div>
         <div class="message">
           <p>
             我是一名智能助理，我可以回答各种问题、提供服务和建议，帮助用户更高效地完成任务和解决问题。
           </p>
-        </div>
-        <div class="roleList">
-          <role-list
-            :is-mobile="isMobile"
-            ref="roleListRef"
-            @sendText="handleSendText"
-          >
-          </role-list>
         </div>
       </div>
     </div>
@@ -234,13 +186,6 @@ import CopyIconElePc from "@/components/CopyIconElePc.vue";
 import UserSvg from "@/components/svg/UserSvg.vue";
 import OpenaiSvg from "@/components/svg/OpenaiSvg.vue";
 import TopTitle from "@/components/TopTitle.vue";
-import DeleteIcon from "@/components/DeleteIconVant.vue";
-import ContextIcon from "@/components/ContextIconVant.vue";
-import CopyIcon from "@/components/CopyIconVant.vue";
-import CopyIconEle from "@/components/CopyIconEle.vue";
-import RoleIcon from "@/components/RoleIconVant.vue";
-import RoleList from "@/components/RoleList.vue";
-import MenuEle from "@/components/MenuEle.vue";
 import { ElMessage } from "element-plus";
 //网络请求
 import { sendInfo } from "@/api/request";
@@ -253,24 +198,10 @@ import resetSizeFun from "@/util/fontSize";
 import md from "@/util/initMarkDown";
 //常量
 import pList from "@/constant/questionList";
-//状态管理
-import useHomeStore from "@/stores/home";
-import { storeToRefs } from "pinia";
 
-// const result = data.map(item => [
-//   { avatar: "/avatar.jpeg", currentType: "user", text: item.question },
-//   { avatar: "/logo.jpg", currentType: "bot", text: item.answer }
-// ]);
 //重置微信页字体大小
 resetSizeFun();
 const menuRef = ref(); //菜单对象
-const roleListRef = ref(); //角色列表对象
-const roleIconRef = ref(); // 是否使用角色的对象
-const isUseCopy = ref(false); //是否启用复制
-const copyIconRef = ref(); //是否启用复制的对象
-const isUseContext = ref(false); //是否启用上下文
-const contextIconRef = ref(); //是否启用上下文的对象
-const deleteIconRef = ref(); //删除按钮对象
 const isForbidScroll = ref(false); //是否禁止滚动
 const keyboardHeight = ref(0); //手机键盘高度
 const list = ref([]); //展示列表
@@ -297,39 +228,6 @@ onMounted(() => {
   });
 });
 
-//聊天记录
-const homeStore = useHomeStore();
-const { chatLogList, currentLogIndex, currentLog, parentMessageId, isNowSend } =
-  storeToRefs(homeStore);
-watchEffect(() => {
-  homeStore.currentLog = chatLogList.value[currentLogIndex.value];
-  //无任何记录时展示首页
-  if (chatLogList.value.length < 1) {
-    list.value = [];
-    return;
-  }
-  //首次进入展示首页
-  if (!currentLog.value) {
-    return;
-  }
-  list.value = currentLog.value.chatLog.list
-    .map((item) => [
-      {
-        avatar: "/avatar.jpeg",
-        currentType: "user",
-        text: item.question,
-        id: item.qid,
-      },
-      {
-        avatar: "/logo.jpg",
-        currentType: "bot",
-        text: item.answer,
-        id: item.aid,
-      },
-    ])
-    .flat();
-});
-
 function isMobileFun() {
   if (screen.width < 768) {
     isMobile.value = true;
@@ -352,9 +250,6 @@ async function send() {
     });
     return;
   }
-  if (currentLogIndex.value === -1) {
-    menuRef.value.handleNewLog();
-  }
   nextTick(() => {
     list.value.push({
       text: message,
@@ -368,7 +263,6 @@ async function send() {
     });
   });
   //开启键盘定制
-  isNowSend.value = true;
   setScreen();
   question.value = "";
   loading.value = true;
@@ -376,7 +270,6 @@ async function send() {
 
   try {
     const obj = { message };
-    obj.parentMessageId = contextControlParams();
     sendInfo({
       data: obj,
       signal: controller.value.signal,
@@ -394,13 +287,6 @@ async function send() {
       .finally(() => {
         sendInfolater();
       });
-    // axios({
-    // url: "https://i07t1z.laf.dev/send", //换自己的接口
-    // method: "post",
-
-    // },
-    // })
-
     // 返回 id 并保存
   } catch (error) {
     console.log(error);
@@ -418,14 +304,20 @@ async function send() {
 function downloadPro(progressEvent) {
   const xhr = progressEvent.event.target;
   let { responseText } = xhr;
-  let text = responseText;
-  if (text.indexOf("invoke cloud function got error") !== -1) {
-    text = "请求过于频繁,请稍后再试&nbsp;&nbsp;";
-    list.value[list.value.length - 1].text = text;
+
+  const lastIndex = responseText.lastIndexOf("claude", responseText.length - 2);
+  let chunk = responseText;
+
+  if (lastIndex !== -1) {
+    chunk = responseText.substring(lastIndex);
+  }
+  //限制接口
+  console.log("chunk", chunk);
+  chunk.replace("_Typing…_", "");
+  if (chunk.indexOf("```") !== -1) {
+    list.value[list.value.length - 1].text = md.render(chunk);
   } else {
-    const parts = text.split("--!");
-    parentMessageId.value = parts[1];
-    list.value[list.value.length - 1].text = md.render(parts[0]);
+    list.value[list.value.length - 1].text = chunk;
   }
   loading.value = false;
   setScreen();
@@ -462,9 +354,6 @@ function setScreen(keyboardHeight = 0) {
     setTimeout(() => {
       const scrollHeight = contentListRef.value.scrollHeight || 0;
       // const clientHeight = contentListRef.value.clientHeight;
-      if (!isNowSend.value) {
-        keyboardHeight = 0;
-      }
       contentListRef.value.scrollTop = scrollHeight + keyboardHeight;
     }, 0);
   });
@@ -485,40 +374,6 @@ function handleH5Input() {
   keyboardHeight.value = initHeight - currentHeight;
   setScreen(keyboardHeight.value);
   isForbidScroll.value = keyboardHeight.value === 0 ? false : true;
-}
-
-//是否删除列表
-function handleDeleteList() {
-  deleteIconRef.value.handleDelete(list.value);
-}
-function handleConfirmD() {
-  if (!list.value.length) {
-    deleteIconRef.value.failToast();
-  } else {
-    list.value = [];
-    parentMessageId.value = "";
-    deleteIconRef.value.successToast();
-  }
-}
-
-//是否启用上下文
-function handleContext() {
-  contextIconRef.value.useContext();
-  isUseContext.value = !isUseContext.value;
-}
-function contextControlParams() {
-  if (parentMessageId.value && isUseContext.value) {
-    console.log("parentMessageId.value", parentMessageId.value);
-    return parentMessageId.value;
-  } else {
-    return "";
-  }
-}
-
-//是否启用复制
-function handleCopyIcon() {
-  copyIconRef.value.useCopy();
-  isUseCopy.value = !isUseCopy.value;
 }
 
 const { toClipboard } = useClipboard();
@@ -546,37 +401,8 @@ function handleCopyEle(currentIndex) {
   });
 }
 
-//使用角色
-function handleRole() {
-  roleIconRef.value.useRole();
-}
-function handleUseRole() {
-  roleListRef.value.showList();
-}
-function handleSendText(text) {
-  question.value = text;
-}
-
 //发送信息后要做的事情
 function sendInfolater() {
-  //保存信息到服务器
-  const lastMessageIndex = list.value.length - 1;
-  const secondLastMessageIndex = lastMessageIndex - 1;
-  const result = {
-    question: list.value[secondLastMessageIndex].text,
-    answer: list.value[lastMessageIndex].text,
-  };
-  homeStore.addChatLogTalkAction(result);
-  //如果没有任何聊天记录时，创建新的
-  // if(!chatLogList.value.length) {
-  //   menuRef.value.handleNewLog()
-  // }
-  //更改标题为第一个问题
-  if (currentLog.value.title === "新建聊天") {
-    const data = { id: currentLog.value["_id"], title: result.question };
-    console.log("data", data);
-    menuRef.value.changeTitleFirst(data);
-  }
   //创建新的控制,方便暂停
   controller.value = new AbortController();
   iscancel.value = false;
@@ -638,7 +464,7 @@ function sendInfolater() {
 #myList {
   position: relative;
   /* max-width: 1000px; */
-  height: calc(100vh - 178px);
+  height: calc(100vh - 148px);
   margin: 0 auto;
   overflow-x: hidden;
   overflow-y: auto;
@@ -714,7 +540,7 @@ function sendInfolater() {
   position: relative;
   box-sizing: border-box;
   padding: 16px 18px;
-  padding-bottom: 0;
+  /* padding-bottom: 0; */
   font-size: 15px;
   max-width: 768px;
   margin: 0 auto;
@@ -752,8 +578,8 @@ function sendInfolater() {
   position: relative;
   top: -10px;
   margin-top: 11px;
-  width: 30px;
-  height: 30px;
+  width: 40px;
+  height: 40px;
   border-radius: 3px;
   // border-radius: 50%;
 }
@@ -812,32 +638,10 @@ function sendInfolater() {
   background-color: #fff;
   z-index: 100;
 
-  .controlBox {
-    /* margin: auto; */
-    width: 90%;
-    height: 50px;
-    max-width: 1000px;
-    margin: 0 auto;
-    display: flex;
-    align-items: center;
-
-    .control {
-      /* position: absolute; */
-      display: flex;
-      height: 20px;
-      /* top: 7px; */
-      .role-icon,
-      .context-icon,
-      .delete-icon {
-        margin-right: 33px;
-        cursor: pointer;
-      }
-    }
-  }
-
   .message {
     /* overflow-y: auto; */
     margin: 0 auto;
+
     /* height: 50px; */
     padding: 12px 16px 24px 16px;
     line-height: 50px;
@@ -855,6 +659,7 @@ function sendInfolater() {
     /* height: 70px; */
     max-width: 1000px;
     margin: 0 auto;
+    margin-top: 20px;
     display: flex;
     align-items: center;
     overflow: hidden;
@@ -1028,6 +833,10 @@ textarea {
 }
 
 @media screen and (max-width: 600px) {
+  .listImg {
+    width: 30px;
+    height: 30px;
+  }
   .botTextPack {
     &::after {
       left: 15px;
@@ -1049,7 +858,7 @@ textarea {
   }
   /* 列表正确的高度 */
   #myList {
-    height: calc(100vh - 246px);
+    height: calc(100vh - 184px);
   }
   .topTitle {
     background-color: #32333e;
