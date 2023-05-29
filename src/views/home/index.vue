@@ -306,7 +306,7 @@ function downloadPro(progressEvent) {
   const xhr = progressEvent.event.target;
   let { responseText } = xhr;
   const lastIndex = responseText.lastIndexOf("⭐");
-  let chunk = '';
+  let chunk = responseText;
 
   if (lastIndex !== -1) {
     chunk = responseText.substring(lastIndex);
