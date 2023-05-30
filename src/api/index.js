@@ -2,7 +2,7 @@ import axios from "axios";
 
 // 创建 axios 请求实例
 const serviceAxios = axios.create({
-  baseURL: 'https://rjz4in.laf.run', // 基础请求地址
+  baseURL: 'https://djw7wc.laf.run', // 基础请求地址
   timeout: 180000, // 请求超时设置
   withCredentials: false, // 跨域请求是否需要携带 cookie
 });
